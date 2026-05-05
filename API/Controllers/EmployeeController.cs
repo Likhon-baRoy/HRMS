@@ -1,6 +1,7 @@
 using API.Data;
 using API.DTOs;
 using API.Models;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,9 +10,11 @@ namespace API.Controllers;
 public class EmployeeController : BaseApiController
 {
     private readonly AppDbContext _context;
-    public EmployeeController(AppDbContext context)
+    private readonly IMapper _mapper;
+    public EmployeeController(AppDbContext context, IMapper mapper)
     {
         _context = context;
+        _mapper = mapper;
     }
 
     [HttpPost]
@@ -20,51 +23,33 @@ public class EmployeeController : BaseApiController
         _context.Employees.Add(employee);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetById), new { Id = employee.Id }, employee);
+        return CreatedAtAction(nameof(GetById), new { employee.Id }, employee);
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetAll()
     {
-        var employees = await _context.Employees
-        .Select(e => new EmployeeDto
-        {
-            Id = e.Id,
-            Name = e.Name,
-            Email = e.Email,
-        })
-        .ToListAsync();
-
-
-        return Ok(employees);
+        var employees = await _context.Employees.ToListAsync();
+        return Ok(_mapper.Map<IEnumerable<EmployeeDto>>(employees));
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Employee>> GetById(int id)
+    public async Task<ActionResult<EmployeeDto>> GetById(int id)
     {
         var employee = await _context.Employees.FindAsync(id);
 
-        return employee == null ? NotFound() : Ok(employee);
+        return employee == null ? NotFound() : Ok(_mapper.Map<EmployeeDto>(employee));
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<Employee>> Update(int id, Employee updatedEmployee)
+    public async Task<ActionResult<Employee>> Update(int id, UpdateEmployeeDto dto)
     {
-        if (id != updatedEmployee.Id)
-            return BadRequest();
-
         var employee = await _context.Employees.FindAsync(id);
 
         if (employee == null)
             return NotFound();
 
-        employee.Name = updatedEmployee.Name;
-        employee.Email = updatedEmployee.Email;
-        employee.Phone = updatedEmployee.Phone;
-        employee.Department = updatedEmployee.Department;
-        employee.Position = updatedEmployee.Position;
-        employee.AccountNumber = updatedEmployee.AccountNumber;
-        employee.Status = updatedEmployee.Status;
+        _mapper.Map(dto, employee);
 
         await _context.SaveChangesAsync();
 

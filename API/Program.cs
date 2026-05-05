@@ -1,4 +1,5 @@
 using API.Data;
+using API.Mapping;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
     )
 );
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 var app = builder.Build();
 
