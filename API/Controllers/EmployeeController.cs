@@ -27,6 +27,7 @@ public class EmployeeController : BaseApiController
         var totalCount = await query.CountAsync();
 
         var employees = await query
+            .OrderByDescending(e => e.Id)
             .Skip((param.Page - 1) * param.PageSize)
             .Take(param.PageSize)
             .ToListAsync();
