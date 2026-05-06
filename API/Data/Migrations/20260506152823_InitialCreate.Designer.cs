@@ -8,10 +8,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace API.Migrations
+namespace API.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260504084449_InitialCreate")]
+    [Migration("20260506152823_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
