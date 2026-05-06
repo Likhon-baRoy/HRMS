@@ -11,6 +11,7 @@
     <Folder Include="DTOs/" />
     <Folder Include="Mapping/" />
     <Folder Include="Models/" />
+    <Folder Include="Requests/" />
   </ItemGroup>
 
   <ItemGroup>
