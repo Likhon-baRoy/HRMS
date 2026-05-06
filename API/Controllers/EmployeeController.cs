@@ -1,101 +1,50 @@
-using API.Data;
 using API.DTOs;
-using API.Models;
 using API.Requests;
 using API.Responses;
-using AutoMapper;
+using API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers;
 
-public class EmployeeController : BaseApiController
+public class EmployeeController(IEmployeeService service) : BaseApiController
 {
-    private readonly AppDbContext _context;
-    private readonly IMapper _mapper;
-    public EmployeeController(AppDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
-
     [HttpGet]
-    public async Task<ActionResult<PagedResult<IEnumerable<EmployeeDto>>>> GetAll([FromQuery] PaginationParams param)
+    public async Task<ActionResult<PagedResult<EmployeeDto>>> GetAll([FromQuery] PaginationParams param)
     {
-        var query = _context.Employees.AsQueryable();
-
-        var totalCount = await query.CountAsync();
-
-        var employees = await query
-            .OrderByDescending(e => e.Id)
-            .Skip((param.Page - 1) * param.PageSize)
-            .Take(param.PageSize)
-            .ToListAsync();
-        
-        var data = _mapper.Map<IEnumerable<EmployeeDto>>(employees);
-
-        var result = new PagedResult<EmployeeDto>
-        {
-            Items = data,
-            Meta = new PaginationMeta
-            {
-                Page = param.Page,
-                PageSize = param.PageSize,
-                TotalCount = totalCount,
-                TotalPages = (int)Math.Ceiling(totalCount / (double)param.PageSize)
-            }
-        };
-        
+        var result = await service.GetAllAsync(param);
         return Ok(result);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<ApiResponse<EmployeeDto>>> GetById(int id)
     {
-        var employee = await _context.Employees.FindAsync(id);
-
-        if (employee == null) return NotFound();
-
-        var data = _mapper.Map<EmployeeDto>(employee);
-        
-        return Success(data);
+        var employee = await service.GetByIdAsync(id);
+        return Success(employee);
     }
 
     [HttpPost]
     public async Task<ActionResult> Create(CreateEmployeeDto dto)
     {
-        var employee = _mapper.Map<Models.Employee>(dto);
+        var employee = await service.CreateAsync(dto);
 
-        _context.Employees.Add(employee);
-        await _context.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetById), new { id = employee.Id }, null);
+        return CreatedAtAction(
+            nameof(GetById),
+            new { id = employee.Id },
+            ApiResponse<EmployeeDto>.Ok(employee)
+        );
     }
 
     [HttpPut("{id}")]
     public async Task<ActionResult> Update(int id, UpdateEmployeeDto dto)
     {
-        var employee = await _context.Employees.FindAsync(id);
-
-        if (employee == null) return NotFound();
-
-        _mapper.Map(dto, employee);
-
-        await _context.SaveChangesAsync();
-
+        await service.UpdateAsync(id, dto);
         return NoContent();
     }
 
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {
-        var employee = await _context.Employees.FindAsync(id);
-
-        if (employee == null) return NotFound();
-
-        _context.Employees.Remove(employee);
-        await _context.SaveChangesAsync();
-
+        await service.DeleteAsync(id);
         return NoContent();
     }
 }
