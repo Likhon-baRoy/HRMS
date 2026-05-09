@@ -1,10 +1,31 @@
 using API.Models;
+using API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data;
 
-public class AppDbContext(DbContextOptions options) : DbContext(options)
+public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUserService currentUser) : DbContext(options)
 {
+    public DbSet<Employee> Employees { get; set; }
+
+    public DbSet<UserAccount> UserAccounts { get; set; }
+
+    public DbSet<Department> Departments { get; set; }
+
+    public DbSet<Position> Positions { get; set; }
+
+    public DbSet<Salary> Salaries { get; set; }
+
+    public DbSet<SalaryRevision> SalaryRevisions { get; set; }
+
+    public DbSet<Payroll> Payrolls { get; set; }
+
+    public DbSet<Bonus> Bonuses { get; set; }
+
+    public DbSet<Deduction> Deductions { get; set; }
+
+    public DbSet<PayrollDeduction> PayrollDeductions { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -12,26 +33,50 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
 
-    public DbSet<Employee> Employees { get; set; }
-
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public override int SaveChanges()
     {
-        var entries = ChangeTracker.Entries<BaseEntity>();
+        ApplyAuditInfo();
+
+        return base.SaveChanges();
+    }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        ApplyAuditInfo();
+
+        return await base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void ApplyAuditInfo()
+    {
+        var entries = ChangeTracker
+            .Entries<BaseEntity>();
+
+        var now = DateTime.UtcNow;
 
         foreach (var entry in entries)
         {
-            if (entry.State == EntityState.Added)
+            switch (entry.State)
             {
-                entry.Entity.CreatedAt = DateTime.UtcNow;
-            }
+                case EntityState.Added:
 
-            if (entry.State == EntityState.Modified)
-            {
-                entry.Property(x => x.CreatedAt).IsModified = false; // never overwrite the original creation timestamp
-                entry.Entity.UpdatedAt = DateTime.UtcNow;
+                    entry.Entity.CreatedAt = now;
+                    entry.Entity.CreatedBy = currentUser.UserId;
+
+                    break;
+
+                case EntityState.Modified:
+
+                    entry.Property(x => x.CreatedAt)
+                        .IsModified = false; // never overwrite the original creation timestamp
+                    entry.Property(x => x.CreatedBy)
+                        .IsModified = false;
+
+                    entry.Entity.UpdatedAt = now;
+                    entry.Entity.UpdatedBy = currentUser.UserId;
+
+                    break;
             }
         }
-
-        return base.SaveChangesAsync(cancellationToken);
     }
 }
