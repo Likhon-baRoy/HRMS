@@ -2,10 +2,12 @@ using API.DTOs;
 using API.Requests;
 using API.Responses;
 using API.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+[Authorize(Roles = "Admin")]
 public class EmployeeController(IEmployeeService service) : BaseApiController
 {
     [HttpGet]
@@ -15,7 +17,7 @@ public class EmployeeController(IEmployeeService service) : BaseApiController
         return Ok(result);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<ActionResult<ApiResponse<EmployeeDto>>> GetById(int id)
     {
         var employee = await service.GetByIdAsync(id);
@@ -34,14 +36,14 @@ public class EmployeeController(IEmployeeService service) : BaseApiController
         );
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{id:int}")]
     public async Task<ActionResult> Update(int id, UpdateEmployeeDto dto)
     {
         await service.UpdateAsync(id, dto);
         return NoContent();
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int}")]
     public async Task<ActionResult> Delete(int id)
     {
         await service.DeleteAsync(id);

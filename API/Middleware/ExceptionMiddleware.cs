@@ -14,7 +14,8 @@ public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddlewa
         }
         catch (AppValidationException ex)
         {
-            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+            context.Response.StatusCode =
+                (int)HttpStatusCode.BadRequest;
 
             await context.Response.WriteAsJsonAsync(
                 ApiResponse<object>.Fail(ex.Message, ex.Errors )
@@ -22,7 +23,17 @@ public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddlewa
         }
         catch (NotFoundException ex)
         {
-            context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+            context.Response.StatusCode =
+                (int)HttpStatusCode.NotFound;
+
+            await context.Response.WriteAsJsonAsync(
+                ApiResponse<object>.Fail(ex.Message)
+            );
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            context.Response.StatusCode =
+                StatusCodes.Status401Unauthorized;
 
             await context.Response.WriteAsJsonAsync(
                 ApiResponse<object>.Fail(ex.Message)
@@ -32,7 +43,8 @@ public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddlewa
         {
             logger.LogError(ex, ex.Message);
 
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            context.Response.StatusCode =
+                (int)HttpStatusCode.InternalServerError;
 
             await context.Response.WriteAsJsonAsync(
                 ApiResponse<object>.Fail(

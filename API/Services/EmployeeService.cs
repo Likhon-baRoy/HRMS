@@ -45,8 +45,7 @@ public class EmployeeService(AppDbContext context, IMapper mapper) : IEmployeeSe
         return mapper.Map<EmployeeDto>(employee);
     }
 
-    public async Task<EmployeeDto> CreateAsync(
-        CreateEmployeeDto dto)
+    public async Task<EmployeeDto> CreateAsync(CreateEmployeeDto dto)
     {
         var employee = mapper.Map<Employee>(dto);
 
@@ -57,9 +56,7 @@ public class EmployeeService(AppDbContext context, IMapper mapper) : IEmployeeSe
         return mapper.Map<EmployeeDto>(employee);
     }
 
-    public async Task UpdateAsync(
-        int id,
-        UpdateEmployeeDto dto)
+    public async Task UpdateAsync(int id, UpdateEmployeeDto dto)
     {
         var employee = await context.Employees.FindAsync(id) ?? throw new NotFoundException("Employee not found");
         mapper.Map(dto, employee);
