@@ -13,4 +13,17 @@ public class PaginationMeta
     public bool HasNextPage => Page < TotalPages;
 
     public bool HasPreviousPage => Page > 1;
+
+    public PaginationMeta() { }
+
+    public PaginationMeta(int page, int pageSize, int totalCount)
+    {
+        Page = page;
+        PageSize = pageSize;
+        TotalCount = totalCount;
+
+        TotalPages = (int)Math.Ceiling(
+            totalCount / (double)pageSize
+        );
+    }
 }
