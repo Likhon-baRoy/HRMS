@@ -14,7 +14,9 @@ public class EmployeeService(AppDbContext context, IMapper mapper) : IEmployeeSe
 {
     public async Task<PagedResult<EmployeeDto>> GetAllAsync(PaginationParams param)
     {
-        var query = context.Employees.AsQueryable();
+        var query = context.Employees
+            .AsNoTracking()
+            .AsQueryable();
 
         var totalCount = await query.CountAsync();
 
@@ -36,7 +38,11 @@ public class EmployeeService(AppDbContext context, IMapper mapper) : IEmployeeSe
 
     public async Task<EmployeeDto> GetByIdAsync(int id)
     {
-        var employee = await context.Employees.FindAsync(id) ?? throw new NotFoundException("Employee not found");
+        var employee = await context.Employees
+            .AsNoTracking()
+            .FirstOrDefaultAsync(e => e.Id == id)
+            ?? throw new NotFoundException("Employee not found");
+
         return mapper.Map<EmployeeDto>(employee);
     }
 
@@ -54,6 +60,7 @@ public class EmployeeService(AppDbContext context, IMapper mapper) : IEmployeeSe
     public async Task UpdateAsync(int id, UpdateEmployeeDto dto)
     {
         var employee = await context.Employees.FindAsync(id) ?? throw new NotFoundException("Employee not found");
+
         mapper.Map(dto, employee);
 
         await context.SaveChangesAsync();
@@ -62,6 +69,7 @@ public class EmployeeService(AppDbContext context, IMapper mapper) : IEmployeeSe
     public async Task DeleteAsync(int id)
     {
         var employee = await context.Employees.FindAsync(id) ?? throw new NotFoundException("Employee not found");
+
         context.Employees.Remove(employee);
 
         await context.SaveChangesAsync();

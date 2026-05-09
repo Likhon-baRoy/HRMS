@@ -14,7 +14,9 @@ public class DepartmentService(AppDbContext context, IMapper mapper) : IDepartme
 {
     public async Task<PagedResult<DepartmentDto>> GetAllAsync(PaginationParams param)
     {
-        var query = context.Departments.AsQueryable();
+        var query = context.Departments
+            .AsNoTracking()
+            .AsQueryable();
 
         var totalCount = await query.CountAsync();
 
@@ -36,7 +38,11 @@ public class DepartmentService(AppDbContext context, IMapper mapper) : IDepartme
 
     public async Task<DepartmentDto> GetByIdAsync(int id)
     {
-        var department = await context.Departments.FindAsync(id) ?? throw new NotFoundException("Department not found");
+        var department = await context.Departments
+            .AsNoTracking()
+            .FirstOrDefaultAsync(d => d.Id == id)
+            ?? throw new NotFoundException("Department not found");
+
         return mapper.Map<DepartmentDto>(department);
     }
 
