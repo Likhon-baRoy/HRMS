@@ -6,6 +6,7 @@ using API.Requests;
 using API.Responses;
 using API.Services.Interfaces;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Services;
@@ -15,8 +16,7 @@ public class DepartmentService(AppDbContext context, IMapper mapper) : IDepartme
     public async Task<PagedResult<DepartmentDto>> GetAllAsync(PaginationParams param)
     {
         var query = context.Departments
-            .AsNoTracking()
-            .AsQueryable();
+            .AsNoTracking();
 
         var totalCount = await query.CountAsync();
 
@@ -24,12 +24,11 @@ public class DepartmentService(AppDbContext context, IMapper mapper) : IDepartme
             .OrderByDescending(d => d.Id)
             .Skip((param.Page - 1) * param.PageSize)
             .Take(param.PageSize)
+            .ProjectTo<DepartmentDto>(mapper.ConfigurationProvider)
             .ToListAsync();
 
-        var data = mapper.Map<IEnumerable<DepartmentDto>>(departments);
-
         return new PagedResult<DepartmentDto>(
-            data,
+            departments,
             param.Page,
             param.PageSize,
             totalCount
@@ -40,10 +39,11 @@ public class DepartmentService(AppDbContext context, IMapper mapper) : IDepartme
     {
         var department = await context.Departments
             .AsNoTracking()
+            .ProjectTo<DepartmentDto>(mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(d => d.Id == id)
             ?? throw new NotFoundException("Department not found");
 
-        return mapper.Map<DepartmentDto>(department);
+        return department;
     }
 
     public async Task<DepartmentDto> CreateAsync(CreateDepartmentDto dto)

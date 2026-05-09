@@ -6,6 +6,7 @@ using API.Requests;
 using API.Responses;
 using API.Services.Interfaces;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Services;
@@ -15,8 +16,7 @@ public class EmployeeService(AppDbContext context, IMapper mapper) : IEmployeeSe
     public async Task<PagedResult<EmployeeDto>> GetAllAsync(PaginationParams param)
     {
         var query = context.Employees
-            .AsNoTracking()
-            .AsQueryable();
+            .AsNoTracking();
 
         var totalCount = await query.CountAsync();
 
@@ -24,12 +24,11 @@ public class EmployeeService(AppDbContext context, IMapper mapper) : IEmployeeSe
             .OrderByDescending(e => e.Id)
             .Skip((param.Page - 1) * param.PageSize)
             .Take(param.PageSize)
+            .ProjectTo<EmployeeDto>(mapper.ConfigurationProvider)
             .ToListAsync();
 
-        var data = mapper.Map<IEnumerable<EmployeeDto>>(employees);
-
         return new PagedResult<EmployeeDto>(
-            data,
+            employees,
             param.Page,
             param.PageSize,
             totalCount
@@ -40,10 +39,11 @@ public class EmployeeService(AppDbContext context, IMapper mapper) : IEmployeeSe
     {
         var employee = await context.Employees
             .AsNoTracking()
+            .ProjectTo<EmployeeDto>(mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(e => e.Id == id)
             ?? throw new NotFoundException("Employee not found");
 
-        return mapper.Map<EmployeeDto>(employee);
+        return employee;
     }
 
     public async Task<EmployeeDto> CreateAsync(CreateEmployeeDto dto)
