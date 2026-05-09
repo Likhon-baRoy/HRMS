@@ -70,7 +70,7 @@ public class EmployeeService(AppDbContext context, IMapper mapper) : IEmployeeSe
     {
         var employee = await context.Employees.FindAsync(id) ?? throw new NotFoundException("Employee not found");
 
-        context.Employees.Remove(employee);
+        employee.IsDeleted = true;
 
         await context.SaveChangesAsync();
     }

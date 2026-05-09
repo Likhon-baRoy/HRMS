@@ -31,6 +31,18 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUserSe
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+
+        modelBuilder.Entity<Employee>()
+            .HasQueryFilter(x => !x.IsDeleted);
+
+        modelBuilder.Entity<Department>()
+            .HasQueryFilter(x => !x.IsDeleted);
+
+        modelBuilder.Entity<Position>()
+            .HasQueryFilter(x => !x.IsDeleted);
+
+        modelBuilder.Entity<UserAccount>()
+            .HasQueryFilter(x => !x.IsDeleted);
     }
 
     public override int SaveChanges()

@@ -70,7 +70,7 @@ public class DepartmentService(AppDbContext context, IMapper mapper) : IDepartme
     {
         var department = await context.Departments.FindAsync(id) ?? throw new NotFoundException("Department not found");
 
-        context.Departments.Remove(department);
+        department.IsDeleted = true;
 
         await context.SaveChangesAsync();
     }
