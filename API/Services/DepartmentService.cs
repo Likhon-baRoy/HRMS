@@ -1,5 +1,7 @@
 using API.Data;
 using API.DTOs.Departments;
+using API.Exceptions;
+using API.Models;
 using API.Requests;
 using API.Responses;
 using API.Services.Interfaces;
@@ -24,36 +26,46 @@ public class DepartmentService(AppDbContext context, IMapper mapper) : IDepartme
 
         var data = mapper.Map<IEnumerable<DepartmentDto>>(departments);
 
-        return new PagedResult<DepartmentDto>
-        {
-            Items = data,
-            Meta = new PaginationMeta
-            {
-                Page = param.Page,
-                PageSize = param.PageSize,
-                TotalCount = totalCount,
-                TotalPages = (int)Math.Ceiling((totalCount / (double)param.PageSize))
-            }
-        };
+        return new PagedResult<DepartmentDto>(
+            data,
+            param.Page,
+            param.PageSize,
+            totalCount
+        );
     }
 
-    public Task<DepartmentDto> GetByIdAsync(int id)
+    public async Task<DepartmentDto> GetByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        var department = await context.Departments.FindAsync(id) ?? throw new NotFoundException("Department not found");
+        return mapper.Map<DepartmentDto>(department);
     }
 
-    public Task<DepartmentDto> CreateAsync(CreateDepartmentDto dto)
+    public async Task<DepartmentDto> CreateAsync(CreateDepartmentDto dto)
     {
-        throw new NotImplementedException();
+        var department = mapper.Map<Department>(dto);
+
+        context.Departments.Add(department);
+
+        await context.SaveChangesAsync();
+
+        return mapper.Map<DepartmentDto>(department);
     }
 
-    public Task UpdateAsync(int id, UpdateDepartmentDto dto)
+    public async Task UpdateAsync(int id, UpdateDepartmentDto dto)
     {
-        throw new NotImplementedException();
+        var department = await context.Departments.FindAsync(id) ?? throw new NotFoundException("Department not found");
+
+        mapper.Map(dto, department);
+
+        await context.SaveChangesAsync();
     }
 
-    public Task DeleteAsync(int id)
+    public async Task DeleteAsync(int id)
     {
-        throw new NotImplementedException();
+        var department = await context.Departments.FindAsync(id) ?? throw new NotFoundException("Department not found");
+
+        context.Departments.Remove(department);
+
+        await context.SaveChangesAsync();
     }
 }

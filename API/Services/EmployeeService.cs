@@ -26,17 +26,12 @@ public class EmployeeService(AppDbContext context, IMapper mapper) : IEmployeeSe
 
         var data = mapper.Map<IEnumerable<EmployeeDto>>(employees);
 
-        return new PagedResult<EmployeeDto>
-        {
-            Items = data,
-            Meta = new PaginationMeta
-            {
-                Page = param.Page,
-                PageSize = param.PageSize,
-                TotalCount = totalCount,
-                TotalPages = (int)Math.Ceiling(totalCount / (double)param.PageSize)
-            }
-        };
+        return new PagedResult<EmployeeDto>(
+            data,
+            param.Page,
+            param.PageSize,
+            totalCount
+        );
     }
 
     public async Task<EmployeeDto> GetByIdAsync(int id)
