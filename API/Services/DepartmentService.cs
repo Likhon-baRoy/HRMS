@@ -38,10 +38,10 @@ public class DepartmentService(AppDbContext context, IMapper mapper) : IDepartme
     public async Task<DepartmentDto> GetByIdAsync(int id)
     {
         var department = await context.Departments
-            .AsNoTracking()
-            .ProjectTo<DepartmentDto>(mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync(d => d.Id == id)
-            ?? throw new NotFoundException("Department not found");
+                             .AsNoTracking()
+                             .ProjectTo<DepartmentDto>(mapper.ConfigurationProvider)
+                             .FirstOrDefaultAsync(d => d.Id == id)
+                         ?? throw new NotFoundException("Department not found");
 
         return department;
     }
@@ -54,7 +54,7 @@ public class DepartmentService(AppDbContext context, IMapper mapper) : IDepartme
 
         await context.SaveChangesAsync();
 
-        return mapper.Map<DepartmentDto>(department);
+        return await GetByIdAsync(department.Id);
     }
 
     public async Task UpdateAsync(int id, UpdateDepartmentDto dto)
@@ -69,6 +69,23 @@ public class DepartmentService(AppDbContext context, IMapper mapper) : IDepartme
     public async Task DeleteAsync(int id)
     {
         var department = await context.Departments.FindAsync(id) ?? throw new NotFoundException("Department not found");
+
+        var hasEmployees = await context.Employees
+            .AnyAsync(x => x.DepartmentId == id);
+
+        if (hasEmployees)
+        {
+            throw new AppValidationException(
+                "Validation failed",
+                new Dictionary<string, string[]>
+                {
+                    {
+                        "department",
+                        ["Department contains employees"]
+                    }
+                }
+            );
+        }
 
         department.IsDeleted = true;
 

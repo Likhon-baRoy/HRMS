@@ -15,7 +15,7 @@ public class DepartmentController(IDepartmentService service) : BaseApiControlle
     {
         var result = await service.GetAllAsync(param);
 
-        return Ok(result);
+        return result;
     }
 
     [HttpGet("{id:int}")]

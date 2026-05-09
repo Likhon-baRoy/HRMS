@@ -14,7 +14,7 @@ public class EmployeeController(IEmployeeService service) : BaseApiController
     public async Task<ActionResult<PagedResult<EmployeeDto>>> GetAll([FromQuery] PaginationParams param)
     {
         var result = await service.GetAllAsync(param);
-        return Ok(result);
+        return result;
     }
 
     [HttpGet("{id:int}")]

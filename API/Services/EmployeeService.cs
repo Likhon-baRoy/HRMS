@@ -54,7 +54,7 @@ public class EmployeeService(AppDbContext context, IMapper mapper) : IEmployeeSe
 
         await context.SaveChangesAsync();
 
-        return mapper.Map<EmployeeDto>(employee);
+        return await GetByIdAsync(employee.Id);
     }
 
     public async Task UpdateAsync(int id, UpdateEmployeeDto dto)
