@@ -48,6 +48,24 @@ public class DepartmentService(AppDbContext context, IMapper mapper) : IDepartme
 
     public async Task<DepartmentDto> CreateAsync(CreateDepartmentDto dto)
     {
+        var exists = await context.Departments
+            .AnyAsync(x =>
+                x.Name != dto.Name);
+
+        if (exists)
+        {
+            throw new AppValidationException(
+                "Validation failed",
+                new Dictionary<string, string[]>
+                {
+                    {
+                        "name",
+                        ["Department already exists"]
+                    }
+                }
+            );
+        }
+
         var department = mapper.Map<Department>(dto);
 
         context.Departments.Add(department);
@@ -59,6 +77,24 @@ public class DepartmentService(AppDbContext context, IMapper mapper) : IDepartme
 
     public async Task UpdateAsync(int id, UpdateDepartmentDto dto)
     {
+        var exists = await context.Departments
+            .AnyAsync(x =>
+                x.Name == dto.Name);
+
+        if (exists)
+        {
+            throw new AppValidationException(
+                "Validation failed",
+                new Dictionary<string, string[]>
+                {
+                    {
+                        "name",
+                        ["Department already exists"]
+                    }
+                }
+            );
+        }
+
         var department = await context.Departments.FindAsync(id) ?? throw new NotFoundException("Department not found");
 
         mapper.Map(dto, department);
