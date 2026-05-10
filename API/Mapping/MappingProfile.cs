@@ -14,7 +14,17 @@ public class MappingProfile : Profile
         // =========================
 
         // Date flow: Client → DTO → Entity
-        CreateMap<Employee, EmployeeDto>();
+        CreateMap<Employee, EmployeeDto>()
+            .ForMember(
+                dest => dest.DepartmentName,
+                opt => opt.MapFrom(src =>
+                    src.Department.Name
+                ))
+            .ForMember(
+                dest => dest.PositionTitle,
+                opt => opt.MapFrom(src =>
+                    src.Position.Title
+                ));
 
         // Data flow: Client → DTO → Entity → Database
         CreateMap<CreateEmployeeDto, Employee>();
