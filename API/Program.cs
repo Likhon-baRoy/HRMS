@@ -3,42 +3,25 @@ using API.Data;
 using API.Data.Seeders;
 using API.Mapping;
 using API.Middleware;
-using API.Responses;
 using API.Services;
+using FluentValidation;
 using API.Services.Interfaces;
+using API.Validators;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-
-// Override invalid model state behavior. ALL responses become standardized
-builder.Services.Configure<ApiBehaviorOptions>(options =>
-{
-    options.InvalidModelStateResponseFactory = context =>
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services
+    .AddFluentValidationAutoValidation(options =>
     {
-        var errors = context.ModelState
-            .Where(x => x.Value?.Errors.Count > 0)
-            .ToDictionary(
-                kvp =>
-                    char.ToLowerInvariant(kvp.Key[0]) + kvp.Key[1..], // normalize keys to camelCase (frontend-friendly)
-
-                kvp => kvp.Value!.Errors
-                    .Select(e => e.ErrorMessage)
-                    .ToArray()
-            );
-
-        var response = ApiResponse<object>.Fail(
-            "Validation failed",
-            errors
-        );
-
-        return new BadRequestObjectResult(response);
-    };
-});
+        options.OverrideDefaultResultFactoryWith<
+            ValidationResultFactory>();
+    });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(
@@ -53,8 +36,6 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
-
-builder.Services.AddScoped<IPasswordService, PasswordService>();
 
 builder.Services.AddHttpContextAccessor();
 

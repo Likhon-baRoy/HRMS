@@ -1,5 +1,6 @@
 using API.DTOs;
 using API.DTOs.Departments;
+using API.Extensions;
 using API.Models;
 using AutoMapper;
 
@@ -30,8 +31,7 @@ public class MappingProfile : Profile
         CreateMap<CreateEmployeeDto, Employee>();
 
         CreateMap<UpdateEmployeeDto, Employee>()
-            .ForAllMembers(opts =>
-                opts.Condition((src, dest, srcMember) => srcMember != null)); // Ignore null values
+            .IgnoreNullAndDefaultValues();
 
         // =========================
         // Department
@@ -49,9 +49,6 @@ public class MappingProfile : Profile
         CreateMap<CreateDepartmentDto, Department>();
 
         CreateMap<UpdateDepartmentDto, Department>()
-            .ForAllMembers(opts =>
-                opts.Condition((src, dest, srcMember) =>
-                    srcMember != null
-                ));
+            .IgnoreNullAndDefaultValues();
     }
 }

@@ -4,6 +4,7 @@ using System.Text;
 using API.Data;
 using API.DTOs;
 using API.Exceptions;
+using API.Extensions;
 using API.Models;
 using API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +12,11 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace API.Services;
 
-public class AuthService(AppDbContext context, IConfiguration config, IPasswordService passwordService, ICurrentUserService currentUser) : IAuthService
+public class AuthService(
+    AppDbContext context,
+    IConfiguration config,
+    IPasswordService passwordService,
+    ICurrentUserService currentUser) : IAuthService
 {
     public async Task<AuthResponseDto> LoginAsync(LoginDto dto)
     {
@@ -21,14 +26,14 @@ public class AuthService(AppDbContext context, IConfiguration config, IPasswordS
 
         if (user == null || !user.IsActive)
         {
-            throw new NotFoundException("Invalid credentials");
+            throw new UnauthorizedAccessException("Invalid credentials");
         }
 
         var validPassword = passwordService.verify(dto.Password!, user.PasswordHash);
 
         if (!validPassword)
         {
-            throw new NotFoundException("Invalid credentials");
+            throw new UnauthorizedAccessException("Invalid credentials");
         }
 
         user.LastLoginAt = DateTime.UtcNow;
@@ -42,33 +47,14 @@ public class AuthService(AppDbContext context, IConfiguration config, IPasswordS
 
     public async Task RegisterAsync(RegisterUserDto dto)
     {
-        var usernameExists = await context.UserAccounts
-            .AnyAsync(x => x.Username == dto.Username);
+        await context.Employees
+            .GetByIdOrThrowAsync(
+                dto.EmployeeId);
 
-        if (usernameExists)
-        {
-            throw new AppValidationException(
-                "Validation failed",
-                new Dictionary<string, string[]>
-                {
-                    {
-                        "username",
-                        ["Username already exists"]
-                    }
-                });
-        }
-
-        var employee = await context.Employees
-            .FindAsync(dto.EmployeeId);
-
-        if (employee == null)
-        {
-            throw new NotFoundException("Employee not found");
-        }
-
-        var alreadyLinked = await context.UserAccounts
-            .AnyAsync(x
-                => x.EmployeeId == dto.EmployeeId);
+        var alreadyLinked =
+            await context.UserAccounts
+                .AnyAsync(x
+                    => x.EmployeeId == dto.EmployeeId);
 
         if (alreadyLinked)
         {

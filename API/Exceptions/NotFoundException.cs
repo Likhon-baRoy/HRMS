@@ -1,8 +1,6 @@
 namespace API.Exceptions;
 
-public class NotFoundException : Exception
+public class NotFoundException(string entityName, object key) : Exception(
+        $"{entityName} with id '{key}' was not found")
 {
-    public NotFoundException(string message) : base(message)
-    {
-    }
 }

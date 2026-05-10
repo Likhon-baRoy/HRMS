@@ -1,6 +1,7 @@
 using API.Data;
 using API.DTOs.Departments;
 using API.Exceptions;
+using API.Extensions;
 using API.Models;
 using API.Requests;
 using API.Responses;
@@ -37,35 +38,18 @@ public class DepartmentService(AppDbContext context, IMapper mapper) : IDepartme
 
     public async Task<DepartmentDto> GetByIdAsync(int id)
     {
-        var department = await context.Departments
-                             .AsNoTracking()
-                             .ProjectTo<DepartmentDto>(mapper.ConfigurationProvider)
-                             .FirstOrDefaultAsync(d => d.Id == id)
-                         ?? throw new NotFoundException("Department not found");
-
-        return department;
+        return await context.Departments
+            .AsNoTracking()
+            .Where(x => x.Id == id)
+            .ProjectTo<DepartmentDto>(mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync()
+            ?? throw new NotFoundException(
+                nameof(Department),
+                id);
     }
 
     public async Task<DepartmentDto> CreateAsync(CreateDepartmentDto dto)
     {
-        var exists = await context.Departments
-            .AnyAsync(x =>
-                x.Name != dto.Name);
-
-        if (exists)
-        {
-            throw new AppValidationException(
-                "Validation failed",
-                new Dictionary<string, string[]>
-                {
-                    {
-                        "name",
-                        ["Department already exists"]
-                    }
-                }
-            );
-        }
-
         var department = mapper.Map<Department>(dto);
 
         context.Departments.Add(department);
@@ -77,25 +61,9 @@ public class DepartmentService(AppDbContext context, IMapper mapper) : IDepartme
 
     public async Task UpdateAsync(int id, UpdateDepartmentDto dto)
     {
-        var exists = await context.Departments
-            .AnyAsync(x =>
-                x.Name == dto.Name);
-
-        if (exists)
-        {
-            throw new AppValidationException(
-                "Validation failed",
-                new Dictionary<string, string[]>
-                {
-                    {
-                        "name",
-                        ["Department already exists"]
-                    }
-                }
-            );
-        }
-
-        var department = await context.Departments.FindAsync(id) ?? throw new NotFoundException("Department not found");
+        var department =
+            await context.Departments
+                .GetByIdOrThrowAsync(id);
 
         mapper.Map(dto, department);
 
@@ -104,7 +72,9 @@ public class DepartmentService(AppDbContext context, IMapper mapper) : IDepartme
 
     public async Task DeleteAsync(int id)
     {
-        var department = await context.Departments.FindAsync(id) ?? throw new NotFoundException("Department not found");
+        var department =
+            await context.Departments
+                .GetByIdOrThrowAsync(id);
 
         var hasEmployees = await context.Employees
             .AnyAsync(x => x.DepartmentId == id);

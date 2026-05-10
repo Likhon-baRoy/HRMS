@@ -1,6 +1,7 @@
 using API.Data;
 using API.DTOs;
 using API.Exceptions;
+using API.Extensions;
 using API.Models;
 using API.Requests;
 using API.Responses;
@@ -37,13 +38,14 @@ public class EmployeeService(AppDbContext context, IMapper mapper) : IEmployeeSe
 
     public async Task<EmployeeDto> GetByIdAsync(int id)
     {
-        var employee = await context.Employees
+        return await context.Employees
             .AsNoTracking()
+            .Where(x => x.Id == id)
             .ProjectTo<EmployeeDto>(mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync(e => e.Id == id)
-            ?? throw new NotFoundException("Employee not found");
-
-        return employee;
+            .FirstOrDefaultAsync()
+            ?? throw new NotFoundException(
+                nameof(Employee),
+                id);
     }
 
     public async Task<EmployeeDto> CreateAsync(CreateEmployeeDto dto)
@@ -57,18 +59,32 @@ public class EmployeeService(AppDbContext context, IMapper mapper) : IEmployeeSe
         return await GetByIdAsync(employee.Id);
     }
 
-    public async Task UpdateAsync(int id, UpdateEmployeeDto dto)
+    public async Task UpdateAsync(
+        int id,
+        UpdateEmployeeDto dto)
     {
-        var employee = await context.Employees.FindAsync(id) ?? throw new NotFoundException("Employee not found");
+        var employee =
+            await context.Employees
+                .GetByIdOrThrowAsync(id);
+
+        Console.WriteLine(
+            $"Before DepartmentId: {employee.DepartmentId}");
 
         mapper.Map(dto, employee);
+
+        Console.WriteLine(
+            $"After DepartmentId: {employee.DepartmentId}");
+
+        Console.WriteLine(
+            $"After PositionId: {employee.PositionId}");
 
         await context.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(int id)
     {
-        var employee = await context.Employees.FindAsync(id) ?? throw new NotFoundException("Employee not found");
+        var employee = await context.Employees
+            .GetByIdOrThrowAsync(id);
 
         employee.IsDeleted = true;
 
