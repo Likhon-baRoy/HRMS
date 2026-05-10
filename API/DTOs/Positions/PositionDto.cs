@@ -1,6 +1,6 @@
-namespace API.Models;
+namespace API.DTOs.Positions;
 
-public class Position : BaseEntity
+public class PositionDto
 {
     public int Id { get; set; }
 
@@ -10,7 +10,5 @@ public class Position : BaseEntity
 
     public int DepartmentId { get; set; }
 
-    public Department Department { get; set; } = null!;
-
-    public ICollection<Employee> Employees { get; set; } = [];
+    public string DepartmentName { get; set; } = string.Empty;
 }

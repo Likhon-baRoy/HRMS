@@ -1,5 +1,6 @@
 using API.DTOs;
 using API.DTOs.Departments;
+using API.DTOs.Positions;
 using API.Extensions;
 using API.Models;
 using AutoMapper;
@@ -50,5 +51,24 @@ public class MappingProfile : Profile
 
         CreateMap<UpdateDepartmentDto, Department>()
             .IgnoreNullAndDefaultValues();
+
+        // =========================
+        // Position
+        // =========================
+
+        CreateMap<Position, PositionDto>()
+            .ForMember(
+                dest => dest.DepartmentName,
+                opt => opt.MapFrom(src =>
+                    src.Department.Name
+                ));
+
+        CreateMap<CreatePositionDto, Position>();
+
+        CreateMap<UpdatePositionDto, Position>()
+            .ForAllMembers(opts =>
+                opts.Condition((src, dest, srcMember) =>
+                    srcMember != null
+                ));
     }
 }
