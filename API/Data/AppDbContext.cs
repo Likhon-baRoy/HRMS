@@ -46,6 +46,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUserSe
         modelBuilder.Entity<Attendance>()
             .HasQueryFilter(x => !x.IsDeleted);
 
+        modelBuilder.Entity<Payroll>()
+            .HasQueryFilter(x => !x.IsDeleted);
+
         modelBuilder.Entity<UserAccount>()
             .HasQueryFilter(x => !x.IsDeleted);
     }

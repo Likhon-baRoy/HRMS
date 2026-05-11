@@ -1,6 +1,7 @@
 using API.DTOs;
 using API.DTOs.Attendance;
 using API.DTOs.Departments;
+using API.DTOs.Payroll;
 using API.DTOs.Positions;
 using API.Extensions;
 using API.Models;
@@ -77,6 +78,23 @@ public class MappingProfile : Profile
         // =========================
 
         CreateMap<Attendance, AttendanceDto>()
+            .ForMember(
+                dest =>
+                    dest.EmployeeName,
+                opt =>
+                    opt.MapFrom(src =>
+                        src.Employee
+                            .FirstName
+                        + " "
+                        + src.Employee
+                            .LastName
+                    ));
+
+        // =========================
+        // Payroll
+        // =========================
+
+        CreateMap<Payroll, PayrollDto>()
             .ForMember(
                 dest =>
                     dest.EmployeeName,

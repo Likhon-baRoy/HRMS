@@ -1,12 +1,14 @@
-namespace API.Models;
+using API.Models;
 
-public class Payroll : BaseEntity
+namespace API.DTOs.Payroll;
+
+public class PayrollDto
 {
     public int Id { get; set; }
 
     public int EmployeeId { get; set; }
 
-    public Employee Employee { get; set; } = null!;
+    public string EmployeeName { get; set; } = string.Empty;
 
     public DateTime PayPeriodStart { get; set; }
 
@@ -22,11 +24,7 @@ public class Payroll : BaseEntity
 
     public decimal NetSalary { get; set; }
 
-    public DateTime GeneratedAt { get; set; }
-
     public PayrollStatus Status { get; set; }
 
-    public ICollection<PayrollDeduction> PayrollDeductions { get; set; } = [];
-
-    public ICollection<Bonus> Bonuses { get; set; } = [];
+    public DateTime GeneratedAt { get; set; }
 }

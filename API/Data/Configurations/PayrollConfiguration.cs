@@ -34,5 +34,15 @@ public class PayrollConfiguration : IEntityTypeConfiguration<Payroll>
             .WithMany(x => x.Payrolls)
             .HasForeignKey(x => x.EmployeeId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(x =>
+            new
+            {
+                x.EmployeeId,
+                x.PayPeriodStart,
+                x.PayPeriodEnd,
+                x.IsDeleted
+            })
+            .IsUnique();
     }
 }
