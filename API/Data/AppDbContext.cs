@@ -14,6 +14,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUserSe
 
     public DbSet<Position> Positions { get; set; }
 
+    public DbSet<Attendance> Attendances { get; set; }
+
     public DbSet<Salary> Salaries { get; set; }
 
     public DbSet<SalaryRevision> SalaryRevisions { get; set; }
@@ -39,6 +41,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUserSe
             .HasQueryFilter(x => !x.IsDeleted);
 
         modelBuilder.Entity<Position>()
+            .HasQueryFilter(x => !x.IsDeleted);
+
+        modelBuilder.Entity<Attendance>()
             .HasQueryFilter(x => !x.IsDeleted);
 
         modelBuilder.Entity<UserAccount>()

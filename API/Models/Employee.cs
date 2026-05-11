@@ -37,4 +37,6 @@ public class Employee : BaseEntity
     public ICollection<Salary> Salaries { get; set; } = [];
 
     public ICollection<Payroll> Payrolls { get; set; } = [];
+
+    public ICollection<Attendance> Attendances { get; set; } = [];
 }
