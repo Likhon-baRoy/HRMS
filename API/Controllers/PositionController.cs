@@ -43,13 +43,9 @@ public class PositionController(IPositionService service) : BaseApiController
                 nameof(GetById),
                 new
                 {
-                    id =
-                        position.Id
+                    id = position.Id
                 },
-                ApiResponse<
-                    PositionDto>.Ok(
-                    position
-                )
+                ApiResponse<PositionDto>.Ok(position)
             );
     }
 

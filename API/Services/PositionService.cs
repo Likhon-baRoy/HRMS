@@ -85,12 +85,25 @@ public class PositionService(AppDbContext context, IMapper mapper) : IPositionSe
         var position =
             await context
                 .Positions
-                .GetByIdOrThrowAsync(
-                    id);
+                .GetByIdOrThrowAsync(id);
 
-        mapper.Map(
-            dto,
-            position);
+        if (!string.IsNullOrWhiteSpace(dto.Title))
+        {
+            position.Title =
+                dto.Title;
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.JobLevel))
+        {
+            position.JobLevel =
+                dto.JobLevel;
+        }
+
+        if (dto.DepartmentId.HasValue)
+        {
+            position.DepartmentId =
+                dto.DepartmentId.Value;
+        }
 
         await context
             .SaveChangesAsync();
