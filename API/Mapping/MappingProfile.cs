@@ -1,4 +1,5 @@
 using API.DTOs;
+using API.DTOs.Attendance;
 using API.DTOs.Departments;
 using API.DTOs.Positions;
 using API.Extensions;
@@ -70,5 +71,22 @@ public class MappingProfile : Profile
                 opts.Condition((src, dest, srcMember) =>
                     srcMember != null
                 ));
+
+        // =========================
+        // Attendance
+        // =========================
+
+        CreateMap<Attendance, AttendanceDto>()
+            .ForMember(
+                dest =>
+                    dest.EmployeeName,
+                opt =>
+                    opt.MapFrom(src =>
+                        src.Employee
+                            .FirstName
+                        + " "
+                        + src.Employee
+                            .LastName
+                    ));
     }
 }

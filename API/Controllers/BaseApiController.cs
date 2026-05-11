@@ -17,6 +17,18 @@ public class BaseApiController : ControllerBase
         });
     }
 
+    // For action responses
+    protected ActionResult<ApiResponse<object>> Success(string message)
+    {
+        return Ok(
+            new ApiResponse<object>
+            {
+                Success = true,
+                Message = message,
+                Data = null
+            });
+    }
+
     protected ActionResult<ApiResponse<T>> Fail<T>(string message)
     {
         return BadRequest(new ApiResponse<T>
