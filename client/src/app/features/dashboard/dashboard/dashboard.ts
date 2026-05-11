@@ -1,9 +1,20 @@
-import { Component } from '@angular/core';
+import { Component }
+from '@angular/core';
 
 @Component({
-  selector: 'app-dashboard',
+  selector:
+    'app-dashboard',
+
+  standalone: true,
+
   imports: [],
-  templateUrl: './dashboard.html',
-  styleUrl: './dashboard.scss',
+
+  templateUrl:
+    './dashboard.html',
+
+  styleUrl:
+    './dashboard.scss',
 })
-export class Dashboard {}
+export class Dashboard
+{
+}
