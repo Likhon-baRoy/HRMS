@@ -1,5 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { JsonPipe } from '@angular/common';
 
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,7 +13,8 @@ import { environment } from '../../../../environments/environment';
   standalone: true,
   imports: [
     MatToolbarModule,
-    MatButtonModule
+    MatButtonModule,
+    JsonPipe
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
@@ -35,7 +37,6 @@ export class Dashboard implements OnInit {
           console.log(response);
           this.stats = response;
         },
-
         error: console.error
       });
   }

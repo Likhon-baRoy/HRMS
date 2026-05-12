@@ -1,1 +1,33 @@
-<p>admin-layout works!</p>
+<mat-sidenav-container class="layout">
+  <mat-sidenav mode="side" opened>
+    <div class="logo">HRMS</div>
+
+    <mat-nav-list>
+      <a mat-list-item routerLink="/dashboard"> Dashboard </a>
+
+      <a mat-list-item> Employees </a>
+
+      <a mat-list-item> Departments </a>
+
+      <a mat-list-item> Positions </a>
+
+      <a mat-list-item> Attendance </a>
+
+      <a mat-list-item> Payroll </a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar color="primary">
+      <span> HRMS </span>
+
+      <span class="spacer"> </span>
+
+      <button mat-button (click)="logout()">Logout</button>
+    </mat-toolbar>
+
+    <div class="content">
+      <router-outlet> </router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
