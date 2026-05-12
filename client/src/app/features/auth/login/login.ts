@@ -1,19 +1,75 @@
-import { Component }
-from '@angular/core';
+import {
+  Component,
+  inject
+} from '@angular/core';
+
+import {
+  Router
+} from '@angular/router';
+
+import {
+  FormsModule
+} from '@angular/forms';
+
+import {
+  MatCardModule
+} from '@angular/material/card';
+
+import {
+  MatFormFieldModule
+} from '@angular/material/form-field';
+
+import {
+  MatInputModule
+} from '@angular/material/input';
+
+import {
+  MatButtonModule
+} from '@angular/material/button';
+
+import {
+  AuthService
+} from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
 
   standalone: true,
 
-  imports: [],
+  imports: [
+    FormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule
+  ],
 
-  templateUrl:
-    './login.html',
+  templateUrl: './login.html',
 
-  styleUrl:
-    './login.scss',
+  styleUrl: './login.scss'
 })
-export class Login
-{
+
+export class Login {
+  username = '';
+
+  password = '';
+
+  private auth = inject( AuthService );
+
+  private router = inject( Router );
+
+  login(): void {
+    this.auth
+      .login({
+        username: this.username,
+        password: this.password
+      })
+      .subscribe({
+        next: () => {
+          this.router
+            .navigate(['/dashboard']);
+        },
+        error: console.error
+      });
+  }
 }

@@ -76,6 +76,22 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
+builder.Services
+    .AddCors(options =>
+    {
+        options.AddPolicy(
+            "AllowAngular",
+            policy =>
+            {
+                policy
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .WithOrigins(
+                        "http://localhost:4200");
+            });
+    });
+
+
 var app = builder.Build();
 
 using (var scop = app.Services.CreateScope())
@@ -88,6 +104,8 @@ using (var scop = app.Services.CreateScope())
 }
 
 app.UseMiddleware<ExceptionMiddleware>();
+
+app.UseCors("AllowAngular");
 
 app.UseAuthentication();
 app.UseAuthorization();
