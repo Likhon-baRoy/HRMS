@@ -1,7 +1,49 @@
-<h1>Dashboard</h1>
+<h1 class="page-title">
+  Dashboard
+</h1>
 
-<p>Welcome to HRMS</p>
+<div class="stats-grid">
 
-<p>Successfully logged in</p>
+  <mat-card class="stat-card">
+    <h3>Total Employees</h3>
+    <h1>
+      {{ stats?.data?.totalEmployees ?? 0 }}
+    </h1>
+  </mat-card>
 
-<pre>{{ stats | json }}</pre>
+  <mat-card class="stat-card">
+    <h3>Total Departments</h3>
+    <h1>
+      {{ stats?.data?.totalDepartments ?? 0 }}
+    </h1>
+  </mat-card>
+
+  <mat-card class="stat-card">
+    <h3>Total Positions</h3>
+    <h1>
+      {{ stats?.data?.totalPositions ?? 0 }}
+    </h1>
+  </mat-card>
+
+  <mat-card class="stat-card">
+    <h3>Today's Attendance</h3>
+    <h1>
+      {{ stats?.data?.todayAttendance ?? 0 }}
+    </h1>
+  </mat-card>
+
+  <mat-card class="stat-card">
+    <h3>Checked In</h3>
+    <h1>
+      {{ stats?.data?.checkedInToday ?? 0 }}
+    </h1>
+  </mat-card>
+
+  <mat-card class="stat-card">
+    <h3>Checked Out</h3>
+    <h1>
+      {{ stats?.data?.checkedOutToday ?? 0 }}
+    </h1>
+  </mat-card>
+
+</div>

@@ -1,27 +1,25 @@
 import { Component, inject, OnInit } from '@angular/core';
+
 import { HttpClient } from '@angular/common/http';
-import { JsonPipe } from '@angular/common';
 
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 
-import { AuthService } from '../../../core/services/auth.service';
 import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
-    MatToolbarModule,
-    MatButtonModule,
-    JsonPipe
+    MatCardModule
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
-export class Dashboard implements OnInit {
-  private auth = inject(AuthService);
-  private http = inject(HttpClient);
+export class Dashboard
+  implements OnInit {
+
+  private http =
+    inject(HttpClient);
 
   stats: any = null;
 
@@ -31,17 +29,19 @@ export class Dashboard implements OnInit {
 
   loadDashboard(): void {
     this.http
-      .get(`${environment.apiUrl}/dashboard`)
+      .get(
+        `${environment.apiUrl}/dashboard`
+      )
       .subscribe({
-        next: (response) => {
-          console.log(response);
-          this.stats = response;
+        next: (
+          response
+        ) => {
+          this.stats =
+            response;
         },
-        error: console.error
-      });
-  }
 
-  logout(): void {
-    this.auth.logout();
+        error:
+          console.error
+      });
   }
 }
