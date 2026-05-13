@@ -25,10 +25,7 @@ public class ValidationResultFactory : IFluentValidationAutoValidationResultFact
 
         return Task.FromResult<IActionResult?>(
             new BadRequestObjectResult(
-                ApiResponse<object>.Fail(
-                    "Validation failed",
-                    errors
-                )
+                ApiResponse<object>.Fail("Validation failed", errors)
             )
         );
     }

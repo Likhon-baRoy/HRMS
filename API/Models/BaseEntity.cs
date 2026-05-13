@@ -1,14 +1,9 @@
+using API.Models.Enums;
+
 namespace API.Models;
 
 public abstract class BaseEntity
+    : BaseTrackableEntity
 {
-    public DateTime CreatedAt { get; set; }
-
-    public DateTime? UpdatedAt { get; set; }
-
-    public int? CreatedBy { get; set; }
-
-    public int? UpdatedBy { get; set; }
-
-    public bool IsDeleted { get; set; }
+    public RecordStatus RecordStatus { get; set; } = RecordStatus.Active;
 }

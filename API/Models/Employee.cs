@@ -1,9 +1,9 @@
+using API.Models.Enums;
+
 namespace API.Models;
 
 public class Employee : BaseEntity
 {
-    public int Id { get; set; }
-
     public string EmployeeCode { get; set; } = string.Empty;
 
     public string FirstName { get; set; } = string.Empty;
@@ -20,7 +20,7 @@ public class Employee : BaseEntity
 
     public DateTime HireDate { get; set; }
 
-    public EmploymentStatus EmploymentStatus { get; set; }
+    public EmploymentStatus EmploymentStatus { get; set; } = EmploymentStatus.Active;
 
     public string AccountNumber { get; set; } = string.Empty;
 

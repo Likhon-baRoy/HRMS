@@ -4,8 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace API.Data.Configurations;
 
-public class AttendanceConfiguration
-    : IEntityTypeConfiguration<Attendance>
+public class AttendanceConfiguration : IEntityTypeConfiguration<Attendance>
 {
     public void Configure(EntityTypeBuilder<Attendance> builder)
     {
@@ -14,28 +13,23 @@ public class AttendanceConfiguration
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Status)
-            .HasMaxLength(50)
+            .HasConversion<int>()
             .IsRequired();
 
         builder.Property(x => x.Remarks)
             .HasMaxLength(500);
 
         builder.HasOne(x => x.Employee)
-            .WithMany(x =>
-                x.Attendances)
-            .HasForeignKey(x =>
-                x.EmployeeId)
-            .OnDelete(
-                DeleteBehavior
-                    .Restrict);
+            .WithMany(x => x.Attendances)
+            .HasForeignKey(x => x.EmployeeId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         // One attendance per employee per day
         builder.HasIndex(x =>
             new
             {
                 x.EmployeeId,
-                x.Date,
-                x.IsDeleted
+                x.Date
             })
             .IsUnique();
     }

@@ -11,4 +11,6 @@ public class PositionDto
     public int DepartmentId { get; set; }
 
     public string DepartmentName { get; set; } = string.Empty;
+
+    public string Status { get; set; } = string.Empty;
 }

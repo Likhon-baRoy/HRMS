@@ -19,6 +19,17 @@ public class PositionConfiguration : IEntityTypeConfiguration<Position>
         builder.Property(x => x.JobLevel)
             .HasMaxLength(50);
 
+        builder.Property(x => x.RecordStatus)
+            .HasConversion<int>()
+            .IsRequired();
+
+        builder.HasIndex(x => new
+            {
+                x.Title,
+                x.DepartmentId
+            })
+            .IsUnique();
+
         builder.HasOne(x => x.Department)
             .WithMany(x => x.Positions)
             .HasForeignKey(x => x.DepartmentId)

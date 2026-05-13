@@ -23,6 +23,11 @@ public class UserAccountConfiguration : IEntityTypeConfiguration<UserAccount>
             .IsRequired();
 
         builder.Property(x => x.Role)
-            .HasMaxLength(50);
+            .HasConversion<int>()
+            .IsRequired();
+
+        builder.Property(x => x.RecordStatus)
+            .HasConversion<int>()
+            .IsRequired();
     }
 }

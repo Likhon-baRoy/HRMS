@@ -3,6 +3,7 @@ using API.DTOs;
 using API.Exceptions;
 using API.Extensions;
 using API.Models;
+using API.Models.Enums;
 using API.Requests;
 using API.Responses;
 using API.Services.Interfaces;
@@ -39,13 +40,13 @@ public class EmployeeService(AppDbContext context, IMapper mapper) : IEmployeeSe
     public async Task<EmployeeDto> GetByIdAsync(int id)
     {
         return await context.Employees
-            .AsNoTracking()
-            .Where(x => x.Id == id)
-            .ProjectTo<EmployeeDto>(mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync()
-            ?? throw new NotFoundException(
-                nameof(Employee),
-                id);
+                   .AsNoTracking()
+                   .Where(x => x.Id == id)
+                   .ProjectTo<EmployeeDto>(mapper.ConfigurationProvider)
+                   .FirstOrDefaultAsync()
+               ?? throw new NotFoundException(
+                   nameof(Employee),
+                   id);
     }
 
     public async Task<EmployeeDto> CreateAsync(CreateEmployeeDto dto)
@@ -59,24 +60,34 @@ public class EmployeeService(AppDbContext context, IMapper mapper) : IEmployeeSe
         return await GetByIdAsync(employee.Id);
     }
 
-    public async Task UpdateAsync(
-        int id,
-        UpdateEmployeeDto dto)
+    public async Task UpdateAsync(int id, UpdateEmployeeDto dto)
     {
         var employee =
             await context.Employees
                 .GetByIdOrThrowAsync(id);
 
-        Console.WriteLine(
-            $"Before DepartmentId: {employee.DepartmentId}");
+        if (!string.IsNullOrWhiteSpace(dto.Phone))
+        {
+            var phoneExists =
+                await context.Employees
+                    .AnyAsync(x => x.Id != id && x.Phone == dto.Phone && x.RecordStatus == RecordStatus.Active);
+
+            if (phoneExists)
+            {
+                throw new AppValidationException(
+                    "Validation failed",
+                    new Dictionary<string, string[]>
+                    {
+                        {
+                            "phone",
+                            ["Phone already exists"]
+                        }
+                    }
+                );
+            }
+        }
 
         mapper.Map(dto, employee);
-
-        Console.WriteLine(
-            $"After DepartmentId: {employee.DepartmentId}");
-
-        Console.WriteLine(
-            $"After PositionId: {employee.PositionId}");
 
         await context.SaveChangesAsync();
     }
@@ -86,7 +97,7 @@ public class EmployeeService(AppDbContext context, IMapper mapper) : IEmployeeSe
         var employee = await context.Employees
             .GetByIdOrThrowAsync(id);
 
-        employee.IsDeleted = true;
+        employee.RecordStatus = RecordStatus.Inactive;
 
         await context.SaveChangesAsync();
     }

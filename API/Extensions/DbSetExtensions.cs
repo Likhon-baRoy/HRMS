@@ -6,14 +6,9 @@ namespace API.Extensions;
 
 public static class DbSetExtensions
 {
-    public static async Task<T> GetByIdOrThrowAsync<T>(
-            this DbSet<T> dbSet,
-            int id)
-        where T : BaseEntity
+    public static async Task<T> GetByIdOrThrowAsync<T>(this DbSet<T> dbSet, int id) where T : BaseEntity
     {
         return await dbSet.FindAsync(id)
-            ?? throw new NotFoundException(
-                typeof(T).Name,
-                id);
+            ?? throw new NotFoundException(typeof(T).Name, id);
     }
 }

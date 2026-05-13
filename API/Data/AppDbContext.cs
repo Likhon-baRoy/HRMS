@@ -1,4 +1,5 @@
 using API.Models;
+using API.Models.Enums;
 using API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -35,22 +36,16 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUserSe
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
         modelBuilder.Entity<Employee>()
-            .HasQueryFilter(x => !x.IsDeleted);
+            .HasQueryFilter(x => x.RecordStatus == RecordStatus.Active);
 
         modelBuilder.Entity<Department>()
-            .HasQueryFilter(x => !x.IsDeleted);
+            .HasQueryFilter(x => x.RecordStatus == RecordStatus.Active);
 
         modelBuilder.Entity<Position>()
-            .HasQueryFilter(x => !x.IsDeleted);
-
-        modelBuilder.Entity<Attendance>()
-            .HasQueryFilter(x => !x.IsDeleted);
-
-        modelBuilder.Entity<Payroll>()
-            .HasQueryFilter(x => !x.IsDeleted);
+            .HasQueryFilter(x => x.RecordStatus == RecordStatus.Active);
 
         modelBuilder.Entity<UserAccount>()
-            .HasQueryFilter(x => !x.IsDeleted);
+            .HasQueryFilter(x => x.RecordStatus == RecordStatus.Active);
     }
 
     public override int SaveChanges()

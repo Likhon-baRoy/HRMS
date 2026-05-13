@@ -2,8 +2,6 @@ namespace API.Models;
 
 public class Position : BaseEntity
 {
-    public int Id { get; set; }
-
     public string Title { get; set; } = string.Empty;
 
     public string JobLevel { get; set; } = string.Empty;

@@ -56,16 +56,7 @@ public class RegisterUserDtoValidator : AbstractValidator<RegisterUserDto>
                 "Password must contain at least one number");
 
         RuleFor(x => x.Role)
-            .NotEmpty()
-            .Must(role =>
-                new[]
-                {
-                    "Admin",
-                    "HR",
-                    "Employee"
-                }
-                .Contains(role))
-            .WithMessage(
-                "Invalid role");
+            .IsInEnum()
+            .WithMessage("Invalid role");
     }
 }

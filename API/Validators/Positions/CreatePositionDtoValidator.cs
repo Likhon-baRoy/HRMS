@@ -1,5 +1,6 @@
 using API.Data;
 using API.DTOs.Positions;
+using API.Models.Enums;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,23 +12,7 @@ public class CreatePositionDtoValidator : AbstractValidator<CreatePositionDto>
     {
         RuleFor(x => x.Title)
             .NotEmpty()
-            .MaximumLength(100)
-            .MustAsync(async (
-                dto,
-                title,
-                cancellation) =>
-            {
-                return !await context
-                    .Positions
-                    .AnyAsync(x =>
-                            x.Title == title
-                            && x.DepartmentId
-                            == dto.DepartmentId
-                            && !x.IsDeleted,
-                        cancellation);
-            })
-            .WithMessage(
-                "Position already exists in this department");
+            .MaximumLength(100);
 
         RuleFor(x => x.JobLevel)
             .NotEmpty()
@@ -35,17 +20,24 @@ public class CreatePositionDtoValidator : AbstractValidator<CreatePositionDto>
 
         RuleFor(x => x.DepartmentId)
             .GreaterThan(0)
-            .MustAsync(async (
-                departmentId,
-                cancellation) =>
+            .MustAsync(async (departmentId, cancellation) =>
             {
-                return await context
-                    .Departments
-                    .AnyAsync(x =>
-                            x.Id == departmentId,
-                        cancellation);
+                return await context.Departments.AnyAsync(x =>
+                        x.Id == departmentId &&
+                        x.RecordStatus == RecordStatus.Active,
+                    cancellation);
             })
-            .WithMessage(
-                "Department not found");
+            .WithMessage("Department not found");
+
+        RuleFor(x => x)
+            .MustAsync(async (dto, cancellation) =>
+            {
+                return !await context.Positions.AnyAsync(x =>
+                        x.Title == dto.Title &&
+                        x.DepartmentId == dto.DepartmentId &&
+                        x.RecordStatus != RecordStatus.Inactive,
+                    cancellation);
+            })
+            .WithMessage("Position already exists in this department");
     }
 }

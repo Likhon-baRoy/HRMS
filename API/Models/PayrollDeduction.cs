@@ -1,9 +1,7 @@
 namespace API.Models;
 
-public class PayrollDeduction
+public class PayrollDeduction : BaseTrackableEntity
 {
-    public int Id { get; set; }
-
     public int PayrollId { get; set; }
 
     public Payroll Payroll { get; set; } = null!;

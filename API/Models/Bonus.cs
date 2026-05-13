@@ -1,9 +1,7 @@
 namespace API.Models;
 
-public class Bonus : BaseEntity
+public class Bonus : BaseTrackableEntity
 {
-    public int Id { get; set; }
-
     public int PayrollId { get; set; }
 
     public Payroll Payroll { get; set; } = null!;

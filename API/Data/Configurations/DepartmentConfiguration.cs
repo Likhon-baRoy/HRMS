@@ -16,6 +16,10 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
             .HasMaxLength(100)
             .IsRequired();
 
+        builder.Property(x => x.RecordStatus)
+            .HasConversion<int>()
+            .IsRequired();
+
         builder.HasIndex(x => x.Name)
             .IsUnique();
 

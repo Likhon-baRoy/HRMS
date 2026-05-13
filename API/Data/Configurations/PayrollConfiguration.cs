@@ -27,9 +27,6 @@ public class PayrollConfiguration : IEntityTypeConfiguration<Payroll>
         builder.Property(x => x.NetSalary)
             .HasPrecision(18, 2);
 
-        builder.Property(x => x.Status)
-            .HasConversion<int>();
-
         builder.HasOne(x => x.Employee)
             .WithMany(x => x.Payrolls)
             .HasForeignKey(x => x.EmployeeId)
@@ -40,8 +37,7 @@ public class PayrollConfiguration : IEntityTypeConfiguration<Payroll>
             {
                 x.EmployeeId,
                 x.PayPeriodStart,
-                x.PayPeriodEnd,
-                x.IsDeleted
+                x.PayPeriodEnd
             })
             .IsUnique();
     }

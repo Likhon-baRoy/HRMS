@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260510220413_AddPosition")]
-    partial class AddPosition
+    [Migration("20260513233227_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,53 @@ namespace API.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+
+            modelBuilder.Entity("API.Models.Attendance", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CheckInTime")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("CheckOutTime")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Remarks")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("UpdatedBy")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId", "Date")
+                        .IsUnique();
+
+                    b.ToTable("attendances", (string)null);
+                });
 
             modelBuilder.Entity("API.Models.Bonus", b =>
                 {
@@ -45,9 +92,6 @@ namespace API.Data.Migrations
 
                     b.Property<int?>("CreatedBy")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
 
                     b.Property<int>("PayrollId")
                         .HasColumnType("int");
@@ -85,9 +129,6 @@ namespace API.Data.Migrations
 
                     b.Property<int?>("CreatedBy")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("IsPercentage")
                         .HasColumnType("tinyint(1)");
@@ -129,9 +170,6 @@ namespace API.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<int?>("ManagerId")
                         .HasColumnType("int");
 
@@ -139,6 +177,9 @@ namespace API.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
+
+                    b.Property<int>("RecordStatus")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
@@ -206,12 +247,10 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("HireDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<string>("LastName")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("Phone")
                         .IsRequired()
@@ -219,6 +258,9 @@ namespace API.Data.Migrations
                         .HasColumnType("varchar(11)");
 
                     b.Property<int>("PositionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RecordStatus")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -241,6 +283,9 @@ namespace API.Data.Migrations
                         .IsUnique();
 
                     b.HasIndex("PositionId");
+
+                    b.HasIndex("Phone", "RecordStatus")
+                        .IsUnique();
 
                     b.ToTable("employees", (string)null);
                 });
@@ -268,9 +313,6 @@ namespace API.Data.Migrations
                     b.Property<decimal>("GrossSalary")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
 
                     b.Property<decimal>("NetSalary")
                         .HasPrecision(18, 2)
@@ -305,7 +347,8 @@ namespace API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EmployeeId");
+                    b.HasIndex("EmployeeId", "PayPeriodStart", "PayPeriodEnd")
+                        .IsUnique();
 
                     b.ToTable("payrolls", (string)null);
                 });
@@ -321,10 +364,22 @@ namespace API.Data.Migrations
                     b.Property<decimal>("AppliedAmount")
                         .HasColumnType("decimal(65,30)");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("CreatedBy")
+                        .HasColumnType("int");
+
                     b.Property<int>("DeductionId")
                         .HasColumnType("int");
 
                     b.Property<int>("PayrollId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("UpdatedBy")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -353,13 +408,13 @@ namespace API.Data.Migrations
                     b.Property<int>("DepartmentId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<string>("JobLevel")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
+
+                    b.Property<int>("RecordStatus")
+                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -375,6 +430,9 @@ namespace API.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DepartmentId");
+
+                    b.HasIndex("Title", "DepartmentId")
+                        .IsUnique();
 
                     b.ToTable("positions", (string)null);
                 });
@@ -413,9 +471,6 @@ namespace API.Data.Migrations
                     b.Property<bool>("IsCurrent")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
@@ -445,9 +500,6 @@ namespace API.Data.Migrations
 
                     b.Property<int?>("CreatedBy")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
 
                     b.Property<decimal>("NewSalary")
                         .HasColumnType("decimal(65,30)");
@@ -495,12 +547,6 @@ namespace API.Data.Migrations
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<DateTime?>("LastLoginAt")
                         .HasColumnType("datetime(6)");
 
@@ -508,10 +554,11 @@ namespace API.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                    b.Property<int>("RecordStatus")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
@@ -533,6 +580,17 @@ namespace API.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("user_accounts", (string)null);
+                });
+
+            modelBuilder.Entity("API.Models.Attendance", b =>
+                {
+                    b.HasOne("API.Models.Employee", "Employee")
+                        .WithMany("Attendances")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
                 });
 
             modelBuilder.Entity("API.Models.Bonus", b =>
@@ -663,6 +721,8 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Models.Employee", b =>
                 {
+                    b.Navigation("Attendances");
+
                     b.Navigation("Payrolls");
 
                     b.Navigation("Salaries");

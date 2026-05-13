@@ -9,12 +9,9 @@ public class GeneratePayrollDtoValidator : AbstractValidator<GeneratePayrollDto>
 {
     public GeneratePayrollDtoValidator(AppDbContext context)
     {
-        RuleFor(x =>
-                x.EmployeeId)
+        RuleFor(x => x.EmployeeId)
             .GreaterThan(0)
-            .MustAsync(async (
-                id,
-                cancellation) =>
+            .MustAsync(async (id, cancellation) =>
             {
                 return await context
                     .Employees
@@ -24,25 +21,19 @@ public class GeneratePayrollDtoValidator : AbstractValidator<GeneratePayrollDto>
             })
             .WithMessage("Employee not found");
 
-        RuleFor(x =>
-                x.PayPeriodStart)
-            .LessThan(x =>
-                x.PayPeriodEnd);
+        RuleFor(x => x.PayPeriodStart)
+            .LessThan(x => x.PayPeriodEnd);
 
-        RuleFor(x =>
-                x.GrossSalary)
+        RuleFor(x => x.GrossSalary)
             .GreaterThanOrEqualTo(0);
 
-        RuleFor(x =>
-                x.TotalBonus)
+        RuleFor(x => x.TotalBonus)
             .GreaterThanOrEqualTo(0);
 
-        RuleFor(x =>
-                x.TotalDeductions)
+        RuleFor(x => x.TotalDeductions)
             .GreaterThanOrEqualTo(0);
 
-        RuleFor(x =>
-                x.TaxAmount)
+        RuleFor(x => x.TaxAmount)
             .GreaterThanOrEqualTo(0);
     }
 }

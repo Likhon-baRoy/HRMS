@@ -23,7 +23,7 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
             .HasMaxLength(50)
             .IsRequired();
 
-        builder.Property(x => x.FirstName)
+        builder.Property(x => x.LastName)
             .HasMaxLength(50)
             .IsRequired();
 
@@ -32,6 +32,13 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
             .IsRequired();
 
         builder.HasIndex(x => x.Email)
+            .IsUnique();
+
+        builder.HasIndex(x => new
+            {
+                x.Phone,
+                x.RecordStatus
+            })
             .IsUnique();
 
         builder.Property(x => x.Phone)
@@ -45,7 +52,12 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
             .HasMaxLength(100);
 
         builder.Property(x => x.EmploymentStatus)
-            .HasConversion<int>();
+            .HasConversion<int>()
+            .IsRequired();
+
+        builder.Property(x => x.RecordStatus)
+            .HasConversion<int>()
+            .IsRequired();
 
         // Department relationship
         builder.HasOne(x => x.Department)

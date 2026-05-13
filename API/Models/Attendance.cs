@@ -1,10 +1,9 @@
+using API.Models.Enums;
+
 namespace API.Models;
 
-public class Attendance
-    : BaseEntity
+public class Attendance : BaseTrackableEntity
 {
-    public int Id { get; set; }
-
     public int EmployeeId { get; set; }
 
     public Employee Employee { get; set; } = null!;
@@ -15,7 +14,7 @@ public class Attendance
 
     public DateTime? CheckOutTime { get; set; }
 
-    public string Status { get; set; } = "Present";
+    public AttendanceStatus Status { get; set; } = AttendanceStatus.Present;
 
     public string? Remarks { get; set; }
 }

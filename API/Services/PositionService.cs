@@ -3,6 +3,7 @@ using API.DTOs.Positions;
 using API.Exceptions;
 using API.Extensions;
 using API.Models;
+using API.Models.Enums;
 using API.Requests;
 using API.Responses;
 using API.Services.Interfaces;
@@ -14,7 +15,7 @@ namespace API.Services;
 
 public class PositionService(AppDbContext context, IMapper mapper) : IPositionService
 {
-    public async Task<PagedResult<PositionDto>> GetAllAsync( PaginationParams param)
+    public async Task<PagedResult<PositionDto>> GetAllAsync(PaginationParams param)
     {
         var query =
             context.Positions
@@ -49,38 +50,53 @@ public class PositionService(AppDbContext context, IMapper mapper) : IPositionSe
 
     public async Task<PositionDto> GetByIdAsync(int id)
     {
-        return await context
-                   .Positions
+        return await context.Positions
                    .AsNoTracking()
                    .Where(x => x.Id == id)
-                   .ProjectTo<
-                       PositionDto>(
-                       mapper.ConfigurationProvider)
+                   .ProjectTo<PositionDto>(mapper.ConfigurationProvider)
                    .FirstOrDefaultAsync()
-               ?? throw new
-                   NotFoundException(
-                       nameof(Position),
-                       id);
+               ?? throw new NotFoundException(nameof(Position), id);
     }
 
-    public async Task<PositionDto> CreateAsync( CreatePositionDto dto)
+    public async Task<PositionDto> CreateAsync(CreatePositionDto dto)
     {
-        var position =
-            mapper.Map<Position>(
-                dto);
+        var existing = await context.Positions
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(x =>
+                x.Title == dto.Title &&
+                x.DepartmentId == dto.DepartmentId);
 
-        context.Positions
-            .Add(position);
+        if (existing != null)
+        {
+            if (existing.RecordStatus == RecordStatus.Active)
+            {
+                throw new AppValidationException(
+                    "Validation failed",
+                    new Dictionary<string, string[]>
+                    {
+                        { "position", ["Position already exists"] }
+                    });
+            }
 
-        await context
-            .SaveChangesAsync();
+            // Reactivate instead of creating new
+            existing.RecordStatus = RecordStatus.Active;
+            existing.JobLevel = dto.JobLevel;
 
-        return await
-            GetByIdAsync(
-                position.Id);
+            await context.SaveChangesAsync();
+
+            return await GetByIdAsync(existing.Id);
+        }
+
+        var position = mapper.Map<Position>(dto);
+
+        context.Positions.Add(position);
+
+        await context.SaveChangesAsync();
+
+        return await GetByIdAsync(position.Id);
     }
 
-    public async Task UpdateAsync( int id, UpdatePositionDto dto)
+    public async Task UpdateAsync(int id, UpdatePositionDto dto)
     {
         var position =
             await context
@@ -89,24 +105,20 @@ public class PositionService(AppDbContext context, IMapper mapper) : IPositionSe
 
         if (!string.IsNullOrWhiteSpace(dto.Title))
         {
-            position.Title =
-                dto.Title;
+            position.Title = dto.Title;
         }
 
         if (!string.IsNullOrWhiteSpace(dto.JobLevel))
         {
-            position.JobLevel =
-                dto.JobLevel;
+            position.JobLevel = dto.JobLevel;
         }
 
         if (dto.DepartmentId.HasValue)
         {
-            position.DepartmentId =
-                dto.DepartmentId.Value;
+            position.DepartmentId = dto.DepartmentId.Value;
         }
 
-        await context
-            .SaveChangesAsync();
+        await context.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(int id)
@@ -141,10 +153,8 @@ public class PositionService(AppDbContext context, IMapper mapper) : IPositionSe
                     });
         }
 
-        position.IsDeleted =
-            true;
+        position.RecordStatus = RecordStatus.Inactive;
 
-        await context
-            .SaveChangesAsync();
+        await context.SaveChangesAsync();
     }
 }

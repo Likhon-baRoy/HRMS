@@ -6,17 +6,14 @@ using API.DTOs;
 using API.Exceptions;
 using API.Extensions;
 using API.Models;
+using API.Models.Enums;
 using API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace API.Services;
 
-public class AuthService(
-    AppDbContext context,
-    IConfiguration config,
-    IPasswordService passwordService,
-    ICurrentUserService currentUser) : IAuthService
+public class AuthService(AppDbContext context, IConfiguration config, IPasswordService passwordService, ICurrentUserService currentUser) : IAuthService
 {
     public async Task<AuthResponseDto> LoginAsync(LoginDto dto)
     {
@@ -24,17 +21,16 @@ public class AuthService(
             .Include(x => x.Employee)
             .FirstOrDefaultAsync(x => x.Username == dto.Username);
 
-        if (user == null || !user.IsActive)
-        {
+        if (user == null)
             throw new UnauthorizedAccessException("Invalid credentials");
-        }
+
+        if (user.RecordStatus == RecordStatus.Inactive)
+            throw new AccountDisabledException("Account is deactivated");
 
         var validPassword = passwordService.verify(dto.Password!, user.PasswordHash);
 
         if (!validPassword)
-        {
             throw new UnauthorizedAccessException("Invalid credentials");
-        }
 
         user.LastLoginAt = DateTime.UtcNow;
 
@@ -114,7 +110,7 @@ public class AuthService(
 
             new(ClaimTypes.Name, user.Username),
 
-            new(ClaimTypes.Role, user.Role),
+            new(ClaimTypes.Role, user.Role.ToString()),
 
             new("employeeId", user.EmployeeId.ToString())
         };
@@ -147,7 +143,7 @@ public class AuthService(
 
             Username = user.Username,
 
-            Role = user.Role,
+            Role = user.Role.ToString(),
 
             ExpiresAt = expiresAt
         };

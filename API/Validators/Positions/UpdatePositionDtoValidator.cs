@@ -10,18 +10,15 @@ public class UpdatePositionDtoValidator : AbstractValidator<UpdatePositionDto>
         RuleFor(x => x.Title)
             .MaximumLength(100)
             .When(x =>
-                !string.IsNullOrWhiteSpace(
-                    x.Title));
+                !string.IsNullOrWhiteSpace(x.Title));
 
         RuleFor(x => x.JobLevel)
             .MaximumLength(50)
             .When(x =>
-                !string.IsNullOrWhiteSpace(
-                    x.JobLevel));
+                !string.IsNullOrWhiteSpace(x.JobLevel));
 
         RuleFor(x => x.DepartmentId)
             .GreaterThan(0)
-            .When(x =>
-                x.DepartmentId.HasValue);
+            .When(x => x.DepartmentId.HasValue);
     }
 }

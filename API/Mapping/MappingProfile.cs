@@ -28,6 +28,16 @@ public class MappingProfile : Profile
                 dest => dest.PositionTitle,
                 opt => opt.MapFrom(src =>
                     src.Position.Title
+                ))
+            .ForMember(
+                dest => dest.EmploymentStatus,
+                opt => opt.MapFrom(src =>
+                    src.EmploymentStatus.ToString()
+                ))
+            .ForMember(
+                dest => dest.Status,
+                opt => opt.MapFrom(src =>
+                    src.RecordStatus.ToString()
                 ));
 
         // Data flow: Client → DTO → Entity → Database
@@ -47,6 +57,11 @@ public class MappingProfile : Profile
                     src.Manager != null
                         ? $"{src.Manager.FirstName} {src.Manager.LastName}"
                         : null
+                ))
+            .ForMember(
+                dest => dest.Status,
+                opt => opt.MapFrom(src =>
+                    src.RecordStatus.ToString()
                 ));
 
         CreateMap<CreateDepartmentDto, Department>();
@@ -63,6 +78,11 @@ public class MappingProfile : Profile
                 dest => dest.DepartmentName,
                 opt => opt.MapFrom(src =>
                     src.Department.Name
+                ))
+            .ForMember(
+                dest => dest.Status,
+                opt => opt.MapFrom(src =>
+                    src.RecordStatus.ToString()
                 ));
 
         CreateMap<CreatePositionDto, Position>();

@@ -1,101 +1,135 @@
 using API.Models;
+using API.Models.Enums;
+using API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace API.Data.Seeders;
 
-public class DbSeeder
+public static class DbSeeder
 {
     public static async Task SeedAsync(AppDbContext context)
     {
-        await context.Database.MigrateAsync();
+        // already seeded
+        var adminExists =
+            await context.UserAccounts
+                .IgnoreQueryFilters()
+                .AnyAsync(x => x.Username == "admin");
 
-        if (await context.UserAccounts.AnyAsync()) return;
+        if (adminExists) return;
 
-        // =========================
+        // resolve password service
+        var passwordService =
+            context.GetService<
+                IPasswordService>();
+
+        // -------------------------
         // Department
-        // =========================
+        // -------------------------
 
-        var department = new Department
+        var department =
+            await context.Departments
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Name == "Administration");
+
+        if (department == null)
         {
-            Name = "Administration",
-            Description = "System Administration"
-        };
+            department = new Department
+            {
+                Name = "Administration",
+                Description = "System Administration",
+                RecordStatus = RecordStatus.Active
+            };
 
-        context.Departments.Add(department);
+            context.Departments.Add(department);
 
-        await context.SaveChangesAsync();
+            await context.SaveChangesAsync();
+        }
 
-        // =========================
+        // -------------------------
         // Position
-        // =========================
+        // -------------------------
 
-        var position = new Position
+        var position =
+            await context.Positions
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x =>
+                    x.Title == "System Administrator" &&
+                    x.DepartmentId == department.Id);
+
+        if (position == null)
         {
-            Title = "System Administrator",
-            JobLevel = "Senior",
-            DepartmentId = department.Id
-        };
+            position = new Position
+            {
+                Title = "System Administrator",
+                JobLevel = "Senior",
+                DepartmentId = department.Id,
+                RecordStatus = RecordStatus.Active
+            };
 
-        context.Positions.Add(position);
+            context.Positions.Add(position);
 
-        await context.SaveChangesAsync();
+            await context.SaveChangesAsync();
+        }
 
-        // =========================
+        // -------------------------
         // Employee
-        // =========================
+        // -------------------------
 
-        var employee = new Employee
+        var employee =
+            await context.Employees
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x =>
+                    x.EmployeeCode ==
+                    "EMP-0001");
+
+        if (employee == null)
         {
-            EmployeeCode = "EMP-0001",
+            employee = new Employee
+            {
+                EmployeeCode = "EMP-0001",
+                FirstName = "System",
+                LastName = "Admin",
+                Email = "admin@hrms.com",
+                Phone = "01700000000",
+                Address = "Head Office",
+                DateOfBirth = new DateTime(1990, 1, 1),
+                HireDate = DateTime.UtcNow,
+                EmploymentStatus = EmploymentStatus.Permanent,
+                DepartmentId = department.Id,
+                PositionId = position.Id,
+                RecordStatus = RecordStatus.Active
+            };
 
-            FirstName = "System",
+            context.Employees.Add(employee);
 
-            LastName = "Administrator",
+            await context.SaveChangesAsync();
+        }
 
-            Email = "admin@hrms.com",
+        // -------------------------
+        // Admin User
+        // -------------------------
 
-            Phone = "000000000",
+        var adminUser =
+            await context.UserAccounts
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x =>
+                    x.Username == "admin");
 
-            Address = "System Generated",
-
-            DateOfBirth = new DateTime(1990, 1, 1),
-
-            HireDate = DateTime.UtcNow,
-
-            EmploymentStatus = EmploymentStatus.Active,
-
-            AccountNumber = "N/A",
-
-            DepartmentId = department.Id,
-
-            PositionId = position.Id
-        };
-
-        context.Employees.Add(employee);
-
-        await context.SaveChangesAsync();
-
-        // =========================
-        // User Account
-        // =========================
-
-        var user = new UserAccount
+        if (adminUser == null)
         {
-            EmployeeId = employee.Id,
+            adminUser = new UserAccount
+            {
+                EmployeeId = employee.Id,
+                Username = "admin",
+                PasswordHash = passwordService.Hash("admin123"),
+                Role = UserRole.Admin,
+                RecordStatus = RecordStatus.Active
+            };
 
-            Username = "admin",
+            context.UserAccounts.Add(adminUser);
 
-            PasswordHash =
-                BCrypt.Net.BCrypt.HashPassword(
-                    "Admin@123"),
-
-            Role = "Admin",
-
-            IsActive = true
-        };
-
-        context.UserAccounts.Add(user);
-
-        await context.SaveChangesAsync();
+            await context.SaveChangesAsync();
+        }
     }
 }

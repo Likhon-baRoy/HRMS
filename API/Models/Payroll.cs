@@ -1,9 +1,9 @@
+using API.Models.Enums;
+
 namespace API.Models;
 
-public class Payroll : BaseEntity
+public class Payroll : BaseTrackableEntity
 {
-    public int Id { get; set; }
-
     public int EmployeeId { get; set; }
 
     public Employee Employee { get; set; } = null!;
@@ -22,9 +22,18 @@ public class Payroll : BaseEntity
 
     public decimal NetSalary { get; set; }
 
+    public void CalculateNetSalary()
+    {
+        NetSalary =
+            GrossSalary
+            + TotalBonus
+            - TotalDeductions
+            - TaxAmount;
+    }
+
     public DateTime GeneratedAt { get; set; }
 
-    public PayrollStatus Status { get; set; }
+    public PayrollStatus Status { get; set; } = PayrollStatus.Pending;
 
     public ICollection<PayrollDeduction> PayrollDeductions { get; set; } = [];
 

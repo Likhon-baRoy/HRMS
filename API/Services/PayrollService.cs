@@ -2,6 +2,7 @@ using API.Data;
 using API.DTOs.Payroll;
 using API.Exceptions;
 using API.Models;
+using API.Models.Enums;
 using API.Requests;
 using API.Responses;
 using API.Services.Interfaces;
@@ -41,33 +42,20 @@ public class PayrollService(AppDbContext context, IMapper mapper) : IPayrollServ
                     });
         }
 
-        var payroll =
-            new Payroll
-            {
-                EmployeeId = dto.EmployeeId,
+        var payroll = new Payroll
+        {
+            EmployeeId = dto.EmployeeId,
+            PayPeriodStart = dto.PayPeriodStart,
+            PayPeriodEnd = dto.PayPeriodEnd,
+            GrossSalary = dto.GrossSalary,
+            TotalBonus = dto.TotalBonus,
+            TotalDeductions = dto.TotalDeductions,
+            TaxAmount = dto.TaxAmount,
+            GeneratedAt = DateTime.UtcNow,
+            Status = PayrollStatus.Pending
+        };
 
-                PayPeriodStart = dto.PayPeriodStart,
-
-                PayPeriodEnd = dto.PayPeriodEnd,
-
-                GrossSalary = dto.GrossSalary,
-
-                TotalBonus = dto.TotalBonus,
-
-                TotalDeductions = dto.TotalDeductions,
-
-                TaxAmount = dto.TaxAmount,
-
-                NetSalary =
-                    dto.GrossSalary
-                    + dto.TotalBonus
-                    - dto.TotalDeductions
-                    - dto.TaxAmount,
-
-                GeneratedAt = DateTime.UtcNow,
-
-                Status = PayrollStatus.Pending
-            };
+        payroll.CalculateNetSalary();
 
         context.Payrolls
             .Add(payroll);

@@ -16,8 +16,7 @@ public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddlewa
         }
         catch (AppValidationException ex)
         {
-            context.Response.StatusCode =
-                (int)HttpStatusCode.BadRequest;
+            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
 
             await context.Response.WriteAsJsonAsync(
                 ApiResponse<object>.Fail(ex.Message, ex.Errors)
@@ -25,8 +24,7 @@ public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddlewa
         }
         catch (NotFoundException ex)
         {
-            context.Response.StatusCode =
-                (int)HttpStatusCode.NotFound;
+            context.Response.StatusCode = (int)HttpStatusCode.NotFound;
 
             await context.Response.WriteAsJsonAsync(
                 ApiResponse<object>.Fail(ex.Message)
@@ -34,8 +32,15 @@ public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddlewa
         }
         catch (UnauthorizedAccessException ex)
         {
-            context.Response.StatusCode =
-                StatusCodes.Status401Unauthorized;
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+
+            await context.Response.WriteAsJsonAsync(
+                ApiResponse<object>.Fail(ex.Message)
+            );
+        }
+        catch (AccountDisabledException ex)
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
 
             await context.Response.WriteAsJsonAsync(
                 ApiResponse<object>.Fail(ex.Message)
@@ -43,60 +48,39 @@ public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddlewa
         }
         catch (DbUpdateException ex)
         {
-            var message =
-                ex.InnerException?.Message ??
-                ex.Message;
+            var message = ex.InnerException?.Message ?? ex.Message;
 
-            var errors =
-                new Dictionary<string, string[]>();
+            var errors = new Dictionary<string, string[]>();
 
-            if (message.Contains("email",
-                    StringComparison
-                        .OrdinalIgnoreCase))
+            if (message.Contains("email", StringComparison.OrdinalIgnoreCase))
             {
-                errors["email"] = [ "Email already exists" ];
+                errors["email"] = ["Email already exists"];
             }
-
-            else if (message.Contains(
-                         "phone",
-                         StringComparison
-                             .OrdinalIgnoreCase))
+            else if (message.Contains("phone", StringComparison.OrdinalIgnoreCase))
             {
-                errors["phone"] = [ "Phone already exists" ];
+                errors["phone"] = ["Phone already exists"];
             }
-
-            else if (message.Contains(
-                         "employee_code",
-                         StringComparison
-                             .OrdinalIgnoreCase))
+            else if (message.Contains("employee_code", StringComparison.OrdinalIgnoreCase))
             {
-                errors["employeeCode"] = [ "Employee code already exists" ];
+                errors["employeeCode"] = ["Employee code already exists"];
             }
-
             else
             {
-                errors["database"] =
-                [
-                    message
-                ];
+                errors["database"] = [message];
             }
 
-            context.Response.StatusCode =
-                (int)HttpStatusCode.BadRequest;
+            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
 
             await context.Response.WriteAsJsonAsync(
-                ApiResponse<object>.Fail(
-                    "Validation failed",
-                    errors
-                )
+                ApiResponse<object>
+                    .Fail("Validation failed", errors)
             );
         }
         catch (Exception ex)
         {
             logger.LogError(ex, ex.Message);
 
-            context.Response.StatusCode =
-                (int)HttpStatusCode.InternalServerError;
+            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
             await context.Response.WriteAsJsonAsync(
                 ApiResponse<object>.Fail(

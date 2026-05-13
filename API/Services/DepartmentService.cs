@@ -3,6 +3,7 @@ using API.DTOs.Departments;
 using API.Exceptions;
 using API.Extensions;
 using API.Models;
+using API.Models.Enums;
 using API.Requests;
 using API.Responses;
 using API.Services.Interfaces;
@@ -50,6 +51,37 @@ public class DepartmentService(AppDbContext context, IMapper mapper) : IDepartme
 
     public async Task<DepartmentDto> CreateAsync(CreateDepartmentDto dto)
     {
+        var existing =
+            await context.Departments
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Name == dto.Name);
+
+        if (existing != null)
+        {
+            if (existing.RecordStatus != RecordStatus.Inactive)
+                throw new AppValidationException(
+                    "Validation failed",
+                    new Dictionary<string, string[]>
+                    {
+                        {
+                            "name",
+                            ["Department already exists"]
+                        }
+                    }
+                );
+
+            existing.RecordStatus = RecordStatus.Active;
+
+            existing.Description = dto.Description;
+
+            existing.ManagerId = dto.ManagerId;
+
+            await context.SaveChangesAsync();
+
+            return await GetByIdAsync(existing.Id);
+
+        }
+
         var department = mapper.Map<Department>(dto);
 
         context.Departments.Add(department);
@@ -93,7 +125,7 @@ public class DepartmentService(AppDbContext context, IMapper mapper) : IDepartme
             );
         }
 
-        department.IsDeleted = true;
+        department.RecordStatus = RecordStatus.Inactive;
 
         await context.SaveChangesAsync();
     }

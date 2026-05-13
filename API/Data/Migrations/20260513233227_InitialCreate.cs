@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace API.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialSchema : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,7 +16,7 @@ namespace API.Data.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Deduction",
+                name: "Deductions",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -30,17 +30,40 @@ namespace API.Data.Migrations
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     CreatedBy = table.Column<int>(type: "int", nullable: true),
-                    UpdatedBy = table.Column<int>(type: "int", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    UpdatedBy = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Deduction", x => x.Id);
+                    table.PrimaryKey("PK_Deductions", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Bonus",
+                name: "attendances",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    EmployeeId = table.Column<int>(type: "int", nullable: false),
+                    Date = table.Column<DateOnly>(type: "date", nullable: false),
+                    CheckInTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    CheckOutTime = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Remarks = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    CreatedBy = table.Column<int>(type: "int", nullable: true),
+                    UpdatedBy = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_attendances", x => x.Id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Bonuses",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -54,12 +77,11 @@ namespace API.Data.Migrations
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     CreatedBy = table.Column<int>(type: "int", nullable: true),
-                    UpdatedBy = table.Column<int>(type: "int", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    UpdatedBy = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Bonus", x => x.Id);
+                    table.PrimaryKey("PK_Bonuses", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -78,7 +100,7 @@ namespace API.Data.Migrations
                     UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     CreatedBy = table.Column<int>(type: "int", nullable: true),
                     UpdatedBy = table.Column<int>(type: "int", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    RecordStatus = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -101,7 +123,7 @@ namespace API.Data.Migrations
                     UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     CreatedBy = table.Column<int>(type: "int", nullable: true),
                     UpdatedBy = table.Column<int>(type: "int", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    RecordStatus = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -125,7 +147,7 @@ namespace API.Data.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     FirstName = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    LastName = table.Column<string>(type: "longtext", nullable: false)
+                    LastName = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Email = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -144,7 +166,7 @@ namespace API.Data.Migrations
                     UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     CreatedBy = table.Column<int>(type: "int", nullable: true),
                     UpdatedBy = table.Column<int>(type: "int", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    RecordStatus = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -183,8 +205,7 @@ namespace API.Data.Migrations
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     CreatedBy = table.Column<int>(type: "int", nullable: true),
-                    UpdatedBy = table.Column<int>(type: "int", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    UpdatedBy = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -213,8 +234,7 @@ namespace API.Data.Migrations
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     CreatedBy = table.Column<int>(type: "int", nullable: true),
-                    UpdatedBy = table.Column<int>(type: "int", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    UpdatedBy = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -239,15 +259,13 @@ namespace API.Data.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     PasswordHash = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Role = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Role = table.Column<int>(type: "int", nullable: false),
                     LastLoginAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     CreatedBy = table.Column<int>(type: "int", nullable: true),
                     UpdatedBy = table.Column<int>(type: "int", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    RecordStatus = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -262,26 +280,30 @@ namespace API.Data.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "PayrollDeduction",
+                name: "PayrollDeductions",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     PayrollId = table.Column<int>(type: "int", nullable: false),
                     DeductionId = table.Column<int>(type: "int", nullable: false),
-                    AppliedAmount = table.Column<decimal>(type: "decimal(65,30)", nullable: false)
+                    AppliedAmount = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    CreatedBy = table.Column<int>(type: "int", nullable: true),
+                    UpdatedBy = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PayrollDeduction", x => x.Id);
+                    table.PrimaryKey("PK_PayrollDeductions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PayrollDeduction_Deduction_DeductionId",
+                        name: "FK_PayrollDeductions_Deductions_DeductionId",
                         column: x => x.DeductionId,
-                        principalTable: "Deduction",
+                        principalTable: "Deductions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PayrollDeduction_payrolls_PayrollId",
+                        name: "FK_PayrollDeductions_payrolls_PayrollId",
                         column: x => x.PayrollId,
                         principalTable: "payrolls",
                         principalColumn: "Id",
@@ -289,9 +311,45 @@ namespace API.Data.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
+            migrationBuilder.CreateTable(
+                name: "SalaryRevisions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    SalaryId = table.Column<int>(type: "int", nullable: false),
+                    OldSalary = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    NewSalary = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    Reason = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    RevisionDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    ApprovedBy = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    CreatedBy = table.Column<int>(type: "int", nullable: true),
+                    UpdatedBy = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SalaryRevisions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SalaryRevisions_salaries_SalaryId",
+                        column: x => x.SalaryId,
+                        principalTable: "salaries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
             migrationBuilder.CreateIndex(
-                name: "IX_Bonus_PayrollId",
-                table: "Bonus",
+                name: "IX_attendances_EmployeeId_Date",
+                table: "attendances",
+                columns: new[] { "EmployeeId", "Date" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Bonuses_PayrollId",
+                table: "Bonuses",
                 column: "PayrollId");
 
             migrationBuilder.CreateIndex(
@@ -329,24 +387,31 @@ namespace API.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_employees_Phone_RecordStatus",
+                table: "employees",
+                columns: new[] { "Phone", "RecordStatus" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_employees_PositionId",
                 table: "employees",
                 column: "PositionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PayrollDeduction_DeductionId",
-                table: "PayrollDeduction",
+                name: "IX_PayrollDeductions_DeductionId",
+                table: "PayrollDeductions",
                 column: "DeductionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PayrollDeduction_PayrollId",
-                table: "PayrollDeduction",
+                name: "IX_PayrollDeductions_PayrollId",
+                table: "PayrollDeductions",
                 column: "PayrollId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_payrolls_EmployeeId",
+                name: "IX_payrolls_EmployeeId_PayPeriodStart_PayPeriodEnd",
                 table: "payrolls",
-                column: "EmployeeId");
+                columns: new[] { "EmployeeId", "PayPeriodStart", "PayPeriodEnd" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_positions_DepartmentId",
@@ -354,9 +419,20 @@ namespace API.Data.Migrations
                 column: "DepartmentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_positions_Title_DepartmentId",
+                table: "positions",
+                columns: new[] { "Title", "DepartmentId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_salaries_EmployeeId",
                 table: "salaries",
                 column: "EmployeeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SalaryRevisions_SalaryId",
+                table: "SalaryRevisions",
+                column: "SalaryId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_user_accounts_EmployeeId",
@@ -371,8 +447,16 @@ namespace API.Data.Migrations
                 unique: true);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Bonus_payrolls_PayrollId",
-                table: "Bonus",
+                name: "FK_attendances_employees_EmployeeId",
+                table: "attendances",
+                column: "EmployeeId",
+                principalTable: "employees",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Bonuses_payrolls_PayrollId",
+                table: "Bonuses",
                 column: "PayrollId",
                 principalTable: "payrolls",
                 principalColumn: "Id",
@@ -395,22 +479,28 @@ namespace API.Data.Migrations
                 table: "departments");
 
             migrationBuilder.DropTable(
-                name: "Bonus");
+                name: "attendances");
 
             migrationBuilder.DropTable(
-                name: "PayrollDeduction");
+                name: "Bonuses");
 
             migrationBuilder.DropTable(
-                name: "salaries");
+                name: "PayrollDeductions");
+
+            migrationBuilder.DropTable(
+                name: "SalaryRevisions");
 
             migrationBuilder.DropTable(
                 name: "user_accounts");
 
             migrationBuilder.DropTable(
-                name: "Deduction");
+                name: "Deductions");
 
             migrationBuilder.DropTable(
                 name: "payrolls");
+
+            migrationBuilder.DropTable(
+                name: "salaries");
 
             migrationBuilder.DropTable(
                 name: "employees");
