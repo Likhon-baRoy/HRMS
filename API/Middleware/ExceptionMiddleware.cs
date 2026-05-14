@@ -1,5 +1,4 @@
 using System.Net;
-using System.Reflection.Metadata;
 using API.Exceptions;
 using API.Responses;
 using Microsoft.EntityFrameworkCore;
@@ -48,32 +47,61 @@ public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddlewa
         }
         catch (DbUpdateException ex)
         {
-            var message = ex.InnerException?.Message ?? ex.Message;
+            logger.LogError(ex, ex.Message);
+
+            var dbMessage = ex.InnerException?.Message ?? ex.Message;
 
             var errors = new Dictionary<string, string[]>();
 
-            if (message.Contains("email", StringComparison.OrdinalIgnoreCase))
+            // Duplicate value checks
+            if (dbMessage.Contains("email", StringComparison.OrdinalIgnoreCase))
             {
-                errors["email"] = ["Email already exists"];
+                errors["email"] =
+                [
+                    "Email already exists"
+                ];
             }
-            else if (message.Contains("phone", StringComparison.OrdinalIgnoreCase))
+            else if (dbMessage.Contains("phone", StringComparison.OrdinalIgnoreCase))
             {
-                errors["phone"] = ["Phone already exists"];
+                errors["phone"] =
+                [
+                    "Phone already exists"
+                ];
             }
-            else if (message.Contains("employee_code", StringComparison.OrdinalIgnoreCase))
+            else if (dbMessage.Contains("employeecode", StringComparison.OrdinalIgnoreCase))
             {
-                errors["employeeCode"] = ["Employee code already exists"];
+                errors["employeeCode"] =
+                [
+                    "Employee code already exists"
+                ];
+            }
+            // Required / nullable column issue
+            else if (dbMessage.Contains("cannot be null", StringComparison.OrdinalIgnoreCase))
+            {
+                errors["database"] =
+                [
+                    env.IsDevelopment()
+                        ? dbMessage
+                        : "Required field missing"
+                ];
             }
             else
             {
-                errors["database"] = [message];
+                errors["database"] =
+                [
+                    env.IsDevelopment()
+                        ? dbMessage
+                        : "Database operation failed"
+                ];
             }
 
-            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
 
             await context.Response.WriteAsJsonAsync(
-                ApiResponse<object>
-                    .Fail("Validation failed", errors)
+                ApiResponse<object>.Fail(
+                    "Validation failed",
+                    errors
+                )
             );
         }
         catch (Exception ex)

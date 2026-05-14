@@ -9,23 +9,52 @@ namespace API.Validators;
 
 public class ValidationResultFactory : IFluentValidationAutoValidationResultFactory
 {
-    public Task<IActionResult?> CreateActionResult(ActionExecutingContext context, ValidationProblemDetails validationProblemDetails, IDictionary<IValidationContext, ValidationResult> validationResults)
+    public Task<IActionResult?> CreateActionResult(
+        ActionExecutingContext context,
+        ValidationProblemDetails? validationProblemDetails,
+        IDictionary<IValidationContext, ValidationResult> validationResults)
     {
-        var errors = validationResults
-            .SelectMany(x => x.Value.Errors)
-            .GroupBy(x =>
-                string.IsNullOrEmpty(x.PropertyName)
-                    ? x.PropertyName
-                    : char.ToLowerInvariant(x.PropertyName[0]) + x.PropertyName[1..]
-            )
-            .ToDictionary(
-                g => g.Key,
-                g => g.Select(x => x.ErrorMessage).ToArray()
-            );
+        var errors = new Dictionary<string, string[]>();
+
+        // FluentValidation errors
+        foreach (var validationResult in validationResults.Values)
+        {
+            foreach (var error in validationResult.Errors)
+            {
+                if (!errors.ContainsKey(error.PropertyName))
+                {
+                    errors[error.PropertyName] = [];
+                }
+
+                errors[error.PropertyName] = errors[error.PropertyName]
+                    .Append(error.ErrorMessage)
+                    .Distinct()
+                    .ToArray();
+            }
+        }
+
+        // Model binding errors
+        foreach (var state in context.ModelState)
+        {
+            var key = state.Key;
+
+            var messages = state.Value.Errors
+                .Select(x => x.ErrorMessage)
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .ToArray();
+
+            if (messages is { Length: > 0 })
+            {
+                errors[key] = messages;
+            }
+        }
 
         return Task.FromResult<IActionResult?>(
             new BadRequestObjectResult(
-                ApiResponse<object>.Fail("Validation failed", errors)
+                ApiResponse<object>.Fail(
+                    "Validation failed",
+                    errors
+                )
             )
         );
     }

@@ -22,7 +22,7 @@ public class Employee : BaseEntity
 
     public EmploymentStatus EmploymentStatus { get; set; } = EmploymentStatus.Active;
 
-    public string AccountNumber { get; set; } = string.Empty;
+    public string? AccountNumber { get; set; }
 
     public int DepartmentId { get; set; }
 

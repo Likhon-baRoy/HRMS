@@ -49,7 +49,8 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
             .IsUnique();
 
         builder.Property(x => x.AccountNumber)
-            .HasMaxLength(100);
+            .HasMaxLength(100)
+            .IsRequired(false);
 
         builder.Property(x => x.EmploymentStatus)
             .HasConversion<int>()
