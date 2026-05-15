@@ -1,63 +1,42 @@
 <h2 mat-dialog-title>
-  {{
-  data
-  ? 'Edit Position'
-  : 'Add Position'
-  }}
+  {{ data ? 'Edit Position' : 'Add Position' }}
 </h2>
 
 <mat-dialog-content>
   <form [formGroup]="form" class="form-grid">
-    <mat-form-field>
-      <mat-label>
-        Position Title
-      </mat-label>
 
+    <!-- Position Title -->
+    <mat-form-field>
+      <mat-label>Position Title</mat-label>
       <input matInput formControlName="title" />
     </mat-form-field>
 
+    <!-- Job Level -->
     <mat-form-field>
-      <mat-label>
-        Job Level
-      </mat-label>
-
+      <mat-label>Job Level</mat-label>
       <mat-select formControlName="jobLevel">
-        @for (
-        level of jobLevels;
-        track level
-        ) {
-        <mat-option [value]="level">
-          {{ level }}
-        </mat-option>
+        @for (level of jobLevels; track level) {
+          <mat-option [value]="level">{{ level }}</mat-option>
         }
       </mat-select>
     </mat-form-field>
 
+    <!-- Department -->
     <mat-form-field>
-      <mat-label>
-        Department
-      </mat-label>
-
+      <mat-label>Department</mat-label>
       <mat-select formControlName="departmentId">
-        @for (
-        department of departments;
-        track department.id
-        ) {
-        <mat-option [value]="department.id">
-          {{ department.name }}
-        </mat-option>
+        @for (department of departments; track department.id) {
+          <mat-option [value]="department.id">
+            {{ department.name }}
+          </mat-option>
         }
       </mat-select>
     </mat-form-field>
+
   </form>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close>
-    Cancel
-  </button>
-
-  <button mat-raised-button color="primary" (click)="save()">
-    Save
-  </button>
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-raised-button color="primary" (click)="save()">Save</button>
 </mat-dialog-actions>

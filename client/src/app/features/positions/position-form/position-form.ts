@@ -1,32 +1,14 @@
-import {
-  Component,
-  Inject,
-  inject
-} from '@angular/core';
-
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  FormBuilder,
-  ReactiveFormsModule,
-  Validators
-} from '@angular/forms';
-
-import {
-  MAT_DIALOG_DATA,
-  MatDialogModule,
-  MatDialogRef
-} from '@angular/material/dialog';
-
+import { ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
-import {
-  MatSnackBar,
-  MatSnackBarModule
-} from '@angular/material/snack-bar';
-
+import { BaseFormComponent } from '../../../core/base/base-form.component';
 import { PositionService } from '../../../core/services/position.service';
 import { DepartmentService } from '../../../core/services/department.service';
 
@@ -34,137 +16,34 @@ import { DepartmentService } from '../../../core/services/department.service';
   selector: 'app-position-form',
   standalone: true,
   imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatSnackBarModule
+    CommonModule, ReactiveFormsModule, MatDialogModule, MatButtonModule,
+    MatInputModule, MatFormFieldModule, MatSelectModule, MatSnackBarModule
   ],
   templateUrl: './position-form.html',
   styleUrl: './position-form.scss'
 })
-export class PositionForm {
-  private fb =
-    inject(FormBuilder);
+export class PositionForm extends BaseFormComponent<any> implements OnInit {
+  protected service = inject(PositionService);
+  private departmentService = inject(DepartmentService);
 
-  private service =
-    inject(PositionService);
-
-  private departmentService =
-    inject(DepartmentService);
-
-  private snackBar =
-    inject(MatSnackBar);
-
+  protected entityName = 'Position';
   departments: any[] = [];
-
   jobLevels = ['Intern', 'Junior', 'Mid', 'Senior', 'Lead', 'Manager'];
 
   form = this.fb.group({
-    title: [
-      '',
-      Validators.required
-    ],
-
-    jobLevel: [''],
-
-    departmentId: [
-      null,
-      Validators.required
-    ]
+    title: ['', Validators.required],
+    jobLevel: ['', Validators.required],
+    departmentId: [null, Validators.required]
   });
 
-  constructor(
-    private dialogRef:
-      MatDialogRef<PositionForm>,
-
-    @Inject(MAT_DIALOG_DATA)
-    public data: any
-  ) {
+  override ngOnInit(): void {
+    super.ngOnInit(); // Instantly handles the edit patchValue mapping behind the scenes
     this.loadDepartments();
-
-    if (data) {
-      this.form.patchValue(
-        data
-      );
-    }
   }
 
-  loadDepartments(): void {
-    this.departmentService
-      .getAll()
-      .subscribe(
-        (response: any) => {
-          this.departments =
-            response.items;
-        }
-      );
-  }
-
-  save(): void {
-    if (
-      this.form.invalid
-    ) {
-      return;
-    }
-
-    const request =
-      this.data
-        ? this.service.update(
-          this.data.id,
-          this.form.value
-        )
-        : this.service.create(
-          this.form.value
-        );
-
-    request.subscribe({
-      next: () => {
-        this.snackBar.open(
-          this.data
-            ? 'Position updated'
-            : 'Position created',
-          'Close',
-          {
-            duration: 3000
-          }
-        );
-
-        this.dialogRef.close(
-          true
-        );
-      },
-
-      error: err => {
-        let message =
-          'Operation failed';
-
-        const errors =
-          err.error?.errors;
-
-        if (errors) {
-          const firstKey =
-            Object.keys(errors)[0];
-
-          if (firstKey) {
-            message =
-              errors[
-              firstKey
-              ][0];
-          }
-        }
-
-        this.snackBar.open(
-          message,
-          'Close',
-          {
-            duration: 3000
-          }
-        );
-      }
+  private loadDepartments(): void {
+    this.departmentService.getAll().subscribe({
+      next: (response: any) => this.departments = response.items
     });
   }
 }
