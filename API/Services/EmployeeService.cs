@@ -13,8 +13,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Services;
 
-public class EmployeeService(AppDbContext context, IMapper mapper) : IEmployeeService
+public class EmployeeService(AppDbContext context, IMapper mapper, ICurrentUserService currentUser) : IEmployeeService
 {
+    private readonly ICurrentUserService _currentUser = currentUser;
+
     public async Task<PagedResult<EmployeeDto>> GetAllAsync(PaginationParams param)
     {
         var query = context.Employees
@@ -94,6 +96,22 @@ public class EmployeeService(AppDbContext context, IMapper mapper) : IEmployeeSe
 
     public async Task DeleteAsync(int id)
     {
+        if (_currentUser.IsSelf(id))
+        {
+            throw new AppValidationException(
+                "Validation failed",
+                new Dictionary<string, string[]>
+                {
+                    {
+                        "employee",
+                        [
+                            "You cannot delete your own account"
+                        ]
+                    }
+                }
+            );
+        }
+
         var employee = await context.Employees
             .GetByIdOrThrowAsync(id);
 

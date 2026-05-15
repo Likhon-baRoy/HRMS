@@ -1,7 +1,7 @@
 <div class="page-header">
   <h2>Employees</h2>
 
-  <button mat-raised-button color="primary">
+  <button mat-raised-button color="primary" (click)="openForm()">
     Add Employee
   </button>
 </div>
@@ -75,6 +75,26 @@
 
     <td mat-cell *matCellDef="let row">
       {{ row.status }}
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="employmentType">
+    <th mat-header-cell *matHeaderCellDef>
+      Type
+    </th>
+
+    <td mat-cell *matCellDef="let row">
+      {{ row.employmentType }}
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="employeeStatus">
+    <th mat-header-cell *matHeaderCellDef>
+      Status
+    </th>
+
+    <td mat-cell *matCellDef="let row">
+      {{ row.employeeStatus }}
     </td>
   </ng-container>
 

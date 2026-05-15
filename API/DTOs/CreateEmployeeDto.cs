@@ -20,7 +20,7 @@ public class CreateEmployeeDto
 
     public DateTime HireDate { get; set; }
 
-    public EmploymentStatus EmploymentStatus { get; set; } = EmploymentStatus.Active;
+    public EmploymentType EmploymentType { get; set; } = EmploymentType.Permanent;
 
     public string? AccountNumber { get; set; }
 

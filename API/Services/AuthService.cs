@@ -13,7 +13,11 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace API.Services;
 
-public class AuthService(AppDbContext context, IConfiguration config, IPasswordService passwordService, ICurrentUserService currentUser) : IAuthService
+public class AuthService(
+    AppDbContext context,
+    IConfiguration config,
+    IPasswordService passwordService,
+    ICurrentUserService currentUser) : IAuthService
 {
     public async Task<AuthResponseDto> LoginAsync(LoginDto dto)
     {
@@ -24,10 +28,17 @@ public class AuthService(AppDbContext context, IConfiguration config, IPasswordS
         if (user == null)
             throw new UnauthorizedAccessException("Invalid credentials");
 
-        if (user.RecordStatus == RecordStatus.Inactive)
-            throw new AccountDisabledException("Account is deactivated");
+        if (
+            user.Employee.EmployeeStatus
+            is EmployeeStatus.Terminated
+            or EmployeeStatus.Suspended
+            or EmployeeStatus.Resigned
+        )
+        {
+            throw new AccountDisabledException("Employee account is inactive");
+        }
 
-        var validPassword = passwordService.verify(dto.Password!, user.PasswordHash);
+        var validPassword = passwordService.Verify(dto.Password!, user.PasswordHash);
 
         if (!validPassword)
             throw new UnauthorizedAccessException("Invalid credentials");
@@ -43,14 +54,33 @@ public class AuthService(AppDbContext context, IConfiguration config, IPasswordS
 
     public async Task RegisterAsync(RegisterUserDto dto)
     {
-        await context.Employees
-            .GetByIdOrThrowAsync(
-                dto.EmployeeId);
+        var employee = await context.Employees
+            .GetByIdOrThrowAsync(dto.EmployeeId);
 
-        var alreadyLinked =
-            await context.UserAccounts
-                .AnyAsync(x
-                    => x.EmployeeId == dto.EmployeeId);
+        if (
+            employee.EmployeeStatus
+            is EmployeeStatus.Resigned
+            or EmployeeStatus.Terminated
+            or EmployeeStatus.Suspended
+        )
+        {
+            throw new AppValidationException(
+                "Validation failed",
+                new Dictionary<string, string[]>
+                {
+                    {
+                        "employeeId",
+                        [
+                            "Employee cannot have an account"
+                        ]
+                    }
+                }
+            );
+        }
+
+        var alreadyLinked = await context.UserAccounts
+            .AnyAsync(x
+                => x.EmployeeId == dto.EmployeeId);
 
         if (alreadyLinked)
         {
@@ -82,8 +112,7 @@ public class AuthService(AppDbContext context, IConfiguration config, IPasswordS
     {
         if (!currentUser.IsAuthenticated)
         {
-            throw new UnauthorizedAccessException(
-                "Unauthorized");
+            throw new UnauthorizedAccessException("Unauthorized");
         }
 
         return new CurrentUserDto
@@ -94,7 +123,9 @@ public class AuthService(AppDbContext context, IConfiguration config, IPasswordS
 
             Username = currentUser.Username ?? string.Empty,
 
-            Role = currentUser.Role ?? string.Empty
+            RoleId = (int)Enum.Parse<UserRole>(currentUser.Role!),
+
+            Role = Enum.Parse<UserRole>(currentUser.Role!).GetDisplayName(),
         };
     }
 
@@ -137,13 +168,13 @@ public class AuthService(AppDbContext context, IConfiguration config, IPasswordS
 
         return new AuthResponseDto
         {
-            Token =
-                new JwtSecurityTokenHandler()
-                    .WriteToken(token),
+            Token = new JwtSecurityTokenHandler().WriteToken(token),
 
             Username = user.Username,
 
-            Role = user.Role.ToString(),
+            RoleId = (int)user.Role,
+
+            Role = user.Role.GetDisplayName(),
 
             ExpiresAt = expiresAt
         };

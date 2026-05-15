@@ -1,6 +1,3 @@
-using API.Models;
-using API.Models.Enums;
-
 namespace API.DTOs.Payroll;
 
 public class PayrollDto
@@ -25,7 +22,9 @@ public class PayrollDto
 
     public decimal NetSalary { get; set; }
 
-    public PayrollStatus Status { get; set; }
+    public int StatusId { get; set; }
+
+    public string Status { get; set; } = string.Empty;
 
     public DateTime GeneratedAt { get; set; }
 }

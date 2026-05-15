@@ -76,5 +76,9 @@ public class CreateEmployeeDtoValidator : AbstractValidator<CreateEmployeeDto>
                         cancellation);
             })
             .WithMessage("Position not found");
+
+        RuleFor(x => x.EmploymentType)
+            .IsInEnum()
+            .WithMessage("Invalid employment type");
     }
 }

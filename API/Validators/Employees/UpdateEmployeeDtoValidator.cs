@@ -34,5 +34,13 @@ public class UpdateEmployeeDtoValidator : AbstractValidator<UpdateEmployeeDto>
         RuleFor(x => x.PositionId)
             .GreaterThan(0)
             .When(x => x.PositionId.HasValue);
+
+        RuleFor(x => x.EmploymentType)
+            .IsInEnum()
+            .When(x => x.EmploymentType.HasValue);
+
+        RuleFor(x => x.EmployeeStatus)
+            .IsInEnum()
+            .When(x => x.EmployeeStatus.HasValue);
     }
 }

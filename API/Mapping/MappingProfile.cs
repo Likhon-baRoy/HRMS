@@ -23,22 +23,50 @@ public class MappingProfile : Profile
                 dest => dest.DepartmentName,
                 opt => opt.MapFrom(src =>
                     src.Department.Name
-                ))
+                )
+            )
             .ForMember(
                 dest => dest.PositionTitle,
                 opt => opt.MapFrom(src =>
                     src.Position.Title
-                ))
+                )
+            )
             .ForMember(
-                dest => dest.EmploymentStatus,
+                dest => dest.EmploymentTypeId,
                 opt => opt.MapFrom(src =>
-                    src.EmploymentStatus.ToString()
-                ))
+                    (int)src.EmploymentType
+                )
+            )
             .ForMember(
-                dest => dest.Status,
+                dest => dest.EmploymentType,
                 opt => opt.MapFrom(src =>
-                    src.RecordStatus.ToString()
-                ));
+                    src.EmploymentType.GetDisplayName()
+                )
+            )
+            .ForMember(
+                dest => dest.EmployeeStatusId,
+                opt => opt.MapFrom(src =>
+                    (int)src.EmployeeStatus
+                )
+            )
+            .ForMember(
+                dest => dest.EmployeeStatus,
+                opt => opt.MapFrom(src =>
+                    src.EmployeeStatus.GetDisplayName()
+                )
+            )
+            .ForMember(
+                dest => dest.RecordStatusId,
+                opt => opt.MapFrom(src =>
+                    (int)src.RecordStatus
+                )
+            )
+            .ForMember(
+                dest => dest.RecordStatus,
+                opt => opt.MapFrom(src =>
+                    src.RecordStatus.GetDisplayName()
+                )
+            );
 
         // Data flow: Client → DTO → Entity → Database
         CreateMap<CreateEmployeeDto, Employee>();
@@ -61,7 +89,7 @@ public class MappingProfile : Profile
             .ForMember(
                 dest => dest.Status,
                 opt => opt.MapFrom(src =>
-                    src.RecordStatus.ToString()
+                    src.RecordStatus.GetDisplayName()
                 ));
 
         CreateMap<CreateDepartmentDto, Department>();
@@ -82,7 +110,7 @@ public class MappingProfile : Profile
             .ForMember(
                 dest => dest.Status,
                 opt => opt.MapFrom(src =>
-                    src.RecordStatus.ToString()
+                    src.RecordStatus.GetDisplayName()
                 ));
 
         CreateMap<CreatePositionDto, Position>();
@@ -99,16 +127,23 @@ public class MappingProfile : Profile
 
         CreateMap<Attendance, AttendanceDto>()
             .ForMember(
-                dest =>
-                    dest.EmployeeName,
-                opt =>
-                    opt.MapFrom(src =>
-                        src.Employee
-                            .FirstName
-                        + " "
-                        + src.Employee
-                            .LastName
-                    ));
+                dest => dest.EmployeeName,
+                opt => opt.MapFrom(src =>
+                    $"{src.Employee.FirstName} {src.Employee.LastName}"
+                )
+            )
+            .ForMember(
+                dest => dest.StatusId,
+                opt => opt.MapFrom(src =>
+                    (int)src.Status
+                )
+            )
+            .ForMember(
+                dest => dest.Status,
+                opt => opt.MapFrom(src =>
+                    src.Status.GetDisplayName()
+                )
+            );
 
         // =========================
         // Payroll
@@ -116,15 +151,22 @@ public class MappingProfile : Profile
 
         CreateMap<Payroll, PayrollDto>()
             .ForMember(
-                dest =>
-                    dest.EmployeeName,
-                opt =>
-                    opt.MapFrom(src =>
-                        src.Employee
-                            .FirstName
-                        + " "
-                        + src.Employee
-                            .LastName
-                    ));
+                dest => dest.EmployeeName,
+                opt => opt.MapFrom(src =>
+                    $"{src.Employee.FirstName} {src.Employee.LastName}"
+                )
+            )
+            .ForMember(
+                dest => dest.StatusId,
+                opt => opt.MapFrom(src =>
+                    (int)src.Status
+                )
+            )
+            .ForMember(
+                dest => dest.Status,
+                opt => opt.MapFrom(src =>
+                    src.Status.GetDisplayName()
+                )
+            );
     }
 }

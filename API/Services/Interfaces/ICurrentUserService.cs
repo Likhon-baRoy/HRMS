@@ -7,4 +7,5 @@ public interface ICurrentUserService
     string? Username { get; }
     string? Role { get; }
     bool IsAuthenticated { get; }
+    bool IsSelf(int id);
 }

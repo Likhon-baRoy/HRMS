@@ -52,7 +52,11 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
             .HasMaxLength(100)
             .IsRequired(false);
 
-        builder.Property(x => x.EmploymentStatus)
+        builder.Property(x => x.EmploymentType)
+            .HasConversion<int>()
+            .IsRequired();
+
+        builder.Property(x => x.EmployeeStatus)
             .HasConversion<int>()
             .IsRequired();
 

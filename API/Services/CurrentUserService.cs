@@ -32,19 +32,21 @@ public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICur
         }
     }
 
-    public string? Username =>
-        httpContextAccessor.HttpContext?
+    public string? Username => httpContextAccessor
+        .HttpContext?
         .User?
         .FindFirstValue(ClaimTypes.Name);
 
-    public string? Role =>
-        httpContextAccessor.HttpContext?
+    public string? Role => httpContextAccessor
+        .HttpContext?
         .User?
         .FindFirstValue(ClaimTypes.Role);
 
-    public bool IsAuthenticated =>
-        httpContextAccessor.HttpContext?
+    public bool IsAuthenticated => httpContextAccessor
+        .HttpContext?
         .User?
         .Identity?
         .IsAuthenticated ?? false;
+
+    public bool IsSelf(int employeeId) => EmployeeId == employeeId;
 }

@@ -8,128 +8,426 @@ namespace API.Data.Seeders;
 
 public static class DbSeeder
 {
-    public static async Task SeedAsync(AppDbContext context)
+    public static async Task SeedAsync(
+        AppDbContext context
+    )
     {
-        // already seeded
-        var adminExists =
+        var alreadySeeded =
             await context.UserAccounts
                 .IgnoreQueryFilters()
-                .AnyAsync(x => x.Username == "admin");
+                .AnyAsync();
 
-        if (adminExists) return;
+        if (alreadySeeded)
+        {
+            return;
+        }
 
-        // resolve password service
         var passwordService =
             context.GetService<
                 IPasswordService>();
 
-        // -------------------------
-        // Department
-        // -------------------------
+        // =====================
+        // Departments
+        // =====================
 
-        var department =
-            await context.Departments
-                .IgnoreQueryFilters()
-                .FirstOrDefaultAsync(x => x.Name == "Administration");
-
-        if (department == null)
-        {
-            department = new Department
+        var departments =
+            new List<Department>
             {
-                Name = "Administration",
-                Description = "System Administration",
-                RecordStatus = RecordStatus.Active
+                new()
+                {
+                    Name =
+                        "Administration",
+                    Description =
+                        "System Administration"
+                },
+
+                new()
+                {
+                    Name =
+                        "Human Resource",
+                    Description =
+                        "HR Department"
+                },
+
+                new()
+                {
+                    Name =
+                        "Accounts",
+                    Description =
+                        "Finance Department"
+                },
+
+                new()
+                {
+                    Name =
+                        "IT",
+                    Description =
+                        "Technology Department"
+                },
+
+                new()
+                {
+                    Name =
+                        "Operations",
+                    Description =
+                        "Operations Team"
+                }
             };
 
-            context.Departments.Add(department);
+        context.Departments
+            .AddRange(
+                departments
+            );
 
-            await context.SaveChangesAsync();
-        }
+        await context
+            .SaveChangesAsync();
 
-        // -------------------------
-        // Position
-        // -------------------------
+        // =====================
+        // Positions
+        // =====================
 
-        var position =
-            await context.Positions
-                .IgnoreQueryFilters()
-                .FirstOrDefaultAsync(x =>
-                    x.Title == "System Administrator" &&
-                    x.DepartmentId == department.Id);
-
-        if (position == null)
-        {
-            position = new Position
+        var positions =
+            new List<Position>
             {
-                Title = "System Administrator",
-                JobLevel = "Senior",
-                DepartmentId = department.Id,
-                RecordStatus = RecordStatus.Active
+                new()
+                {
+                    Title =
+                        "System Administrator",
+
+                    JobLevel =
+                        "Senior",
+
+                    DepartmentId =
+                        departments[0].Id
+                },
+
+                new()
+                {
+                    Title =
+                        "HR Manager",
+
+                    JobLevel =
+                        "Manager",
+
+                    DepartmentId =
+                        departments[1].Id
+                },
+
+                new()
+                {
+                    Title =
+                        "Accountant",
+
+                    JobLevel =
+                        "Mid",
+
+                    DepartmentId =
+                        departments[2].Id
+                },
+
+                new()
+                {
+                    Title =
+                        "Software Engineer",
+
+                    JobLevel =
+                        "Mid",
+
+                    DepartmentId =
+                        departments[3].Id
+                },
+
+                new()
+                {
+                    Title =
+                        "Operations Executive",
+
+                    JobLevel =
+                        "Junior",
+
+                    DepartmentId =
+                        departments[4].Id
+                }
             };
 
-            context.Positions.Add(position);
+        context.Positions
+            .AddRange(
+                positions
+            );
 
-            await context.SaveChangesAsync();
-        }
+        await context
+            .SaveChangesAsync();
 
-        // -------------------------
-        // Employee
-        // -------------------------
+        // =====================
+        // Employees
+        // =====================
 
-        var employee =
-            await context.Employees
-                .IgnoreQueryFilters()
-                .FirstOrDefaultAsync(x =>
-                    x.EmployeeCode ==
-                    "EMP-0001");
-
-        if (employee == null)
-        {
-            employee = new Employee
+        var employees =
+            new List<Employee>
             {
-                EmployeeCode = "EMP-0001",
-                FirstName = "System",
-                LastName = "Admin",
-                Email = "admin@hrms.com",
-                Phone = "01700000000",
-                Address = "Head Office",
-                DateOfBirth = new DateTime(1990, 1, 1),
-                HireDate = DateTime.UtcNow,
-                EmploymentStatus = EmploymentStatus.Permanent,
-                DepartmentId = department.Id,
-                PositionId = position.Id,
-                RecordStatus = RecordStatus.Active
+                new()
+                {
+                    EmployeeCode =
+                        "EMP-0001",
+
+                    FirstName =
+                        "System",
+
+                    LastName =
+                        "Admin",
+
+                    Email =
+                        "admin@hrms.com",
+
+                    Phone =
+                        "01700000001",
+
+                    Address =
+                        "Head Office",
+
+                    DateOfBirth =
+                        new DateTime(
+                            1990,
+                            1,
+                            1
+                        ),
+
+                    HireDate =
+                        DateTime.UtcNow,
+
+                    EmploymentType =
+                        EmploymentType.Permanent,
+
+                    EmployeeStatus =
+                        EmployeeStatus.Active,
+
+                    DepartmentId =
+                        departments[0].Id,
+
+                    PositionId =
+                        positions[0].Id
+                },
+
+                new()
+                {
+                    EmployeeCode =
+                        "EMP-0002",
+
+                    FirstName =
+                        "Sarah",
+
+                    LastName =
+                        "Khan",
+
+                    Email =
+                        "hr@hrms.com",
+
+                    Phone =
+                        "01700000002",
+
+                    Address =
+                        "Dhaka",
+
+                    DateOfBirth =
+                        new DateTime(
+                            1992,
+                            5,
+                            15
+                        ),
+
+                    HireDate =
+                        DateTime.UtcNow,
+
+                    EmploymentType =
+                        EmploymentType.Permanent,
+
+                    EmployeeStatus =
+                        EmployeeStatus.Active,
+
+                    DepartmentId =
+                        departments[1].Id,
+
+                    PositionId =
+                        positions[1].Id
+                },
+
+                new()
+                {
+                    EmployeeCode =
+                        "EMP-0003",
+
+                    FirstName =
+                        "John",
+
+                    LastName =
+                        "Doe",
+
+                    Email =
+                        "manager@hrms.com",
+
+                    Phone =
+                        "01700000003",
+
+                    Address =
+                        "Khulna",
+
+                    DateOfBirth =
+                        new DateTime(
+                            1994,
+                            2,
+                            10
+                        ),
+
+                    HireDate =
+                        DateTime.UtcNow,
+
+                    EmploymentType =
+                        EmploymentType.Permanent,
+
+                    EmployeeStatus =
+                        EmployeeStatus.Active,
+
+                    DepartmentId =
+                        departments[3].Id,
+
+                    PositionId =
+                        positions[3].Id
+                },
+
+                new()
+                {
+                    EmployeeCode =
+                        "EMP-0004",
+
+                    FirstName =
+                        "Employee",
+
+                    LastName =
+                        "User",
+
+                    Email =
+                        "employee@hrms.com",
+
+                    Phone =
+                        "01700000004",
+
+                    Address =
+                        "Chittagong",
+
+                    DateOfBirth =
+                        new DateTime(
+                            1998,
+                            8,
+                            20
+                        ),
+
+                    HireDate =
+                        DateTime.UtcNow,
+
+                    EmploymentType =
+                        EmploymentType.Probation,
+
+                    EmployeeStatus =
+                        EmployeeStatus.Active,
+
+                    DepartmentId =
+                        departments[4].Id,
+
+                    PositionId =
+                        positions[4].Id
+                }
             };
 
-            context.Employees.Add(employee);
+        context.Employees
+            .AddRange(
+                employees
+            );
 
-            await context.SaveChangesAsync();
-        }
+        await context
+            .SaveChangesAsync();
 
-        // -------------------------
-        // Admin User
-        // -------------------------
+        // =====================
+        // User Accounts
+        // =====================
 
-        var adminUser =
-            await context.UserAccounts
-                .IgnoreQueryFilters()
-                .FirstOrDefaultAsync(x =>
-                    x.Username == "admin");
-
-        if (adminUser == null)
-        {
-            adminUser = new UserAccount
+        var users =
+            new List<UserAccount>
             {
-                EmployeeId = employee.Id,
-                Username = "admin",
-                PasswordHash = passwordService.Hash("admin123"),
-                Role = UserRole.Admin,
-                RecordStatus = RecordStatus.Active
+                new()
+                {
+                    EmployeeId =
+                        employees[0].Id,
+
+                    Username =
+                        "admin",
+
+                    PasswordHash =
+                        passwordService.Hash(
+                            "Admin@123"
+                        ),
+
+                    Role =
+                        UserRole.Admin
+                },
+
+                new()
+                {
+                    EmployeeId =
+                        employees[1].Id,
+
+                    Username =
+                        "hr",
+
+                    PasswordHash =
+                        passwordService.Hash(
+                            "Hr@123"
+                        ),
+
+                    Role =
+                        UserRole.Hr
+                },
+
+                new()
+                {
+                    EmployeeId =
+                        employees[2].Id,
+
+                    Username =
+                        "manager",
+
+                    PasswordHash =
+                        passwordService.Hash(
+                            "Manager@123"
+                        ),
+
+                    Role =
+                        UserRole.Manager
+                },
+
+                new()
+                {
+                    EmployeeId =
+                        employees[3].Id,
+
+                    Username =
+                        "employee",
+
+                    PasswordHash =
+                        passwordService.Hash(
+                            "Employee@123"
+                        ),
+
+                    Role =
+                        UserRole.Employee
+                }
             };
 
-            context.UserAccounts.Add(adminUser);
+        context.UserAccounts
+            .AddRange(
+                users
+            );
 
-            await context.SaveChangesAsync();
-        }
+        await context
+            .SaveChangesAsync();
     }
 }

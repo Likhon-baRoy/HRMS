@@ -12,7 +12,8 @@ public class UpdateEmployeeDto
     public string? Address { get; set; }
     public DateTime? DateOfBirth { get; set; }
     public DateTime? HireDate { get; set; }
-    public EmploymentStatus? EmploymentStatus { get; set; }
+    public EmploymentType? EmploymentType { get; set; }
+    public EmployeeStatus? EmployeeStatus { get; set; }
     public string? AccountNumber { get; set; }
     public int? DepartmentId { get; set; }
     public int? PositionId { get; set; }

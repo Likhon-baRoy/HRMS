@@ -4,12 +4,11 @@ namespace API.Models.Enums;
 
 public enum UserRole
 {
-    Admin = 1,
+    [Display(Name = "Admin")] Admin = 1,
 
-    [Display(Name = "HR")]
-    Hr = 2,
+    [Display(Name = "HR")] Hr = 2,
 
-    Manager = 3,
+    [Display(Name = "Manager")] Manager = 3,
 
-    Employee = 4
+    [Display(Name = "Employee")] Employee = 4
 }

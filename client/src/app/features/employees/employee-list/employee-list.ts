@@ -33,6 +33,15 @@ import {
   Employee
 } from '../employee.model';
 
+import {
+  MatDialog,
+  MatDialogModule
+} from '@angular/material/dialog';
+
+import {
+  EmployeeForm
+} from '../employee-form/employee-form';
+
 @Component({
   selector: 'app-employee-list',
 
@@ -54,11 +63,11 @@ import {
 })
 export class EmployeeList
   implements OnInit {
-  private readonly employeeService =
-    inject(EmployeeService);
+  private readonly employeeService = inject(EmployeeService);
 
-  private readonly snackBar =
-    inject(MatSnackBar);
+  private readonly snackBar = inject(MatSnackBar);
+
+  private dialog = inject(MatDialog);
 
   employees: Employee[] = [];
 
@@ -69,7 +78,8 @@ export class EmployeeList
     'phone',
     'department',
     'position',
-    'status',
+    'employmentType',
+    'employeeStatus',
     'actions'
   ];
 
@@ -98,22 +108,32 @@ export class EmployeeList
       });
   }
 
-  editEmployee(
-    employee: Employee
-  ): void {
-    console.log(
-      'Edit',
-      employee
-    );
+  openForm(employee?: Employee): void {
+    const dialogRef =
+      this.dialog.open(
+        EmployeeForm,
+        {
+          data: employee,
+          width: '700px'
+        }
+      );
+
+    dialogRef
+      .afterClosed()
+      .subscribe(result => {
+        if (result) {
+          this.loadEmployees();
+        }
+      });
   }
 
-  deleteEmployee(
-    id: number
-  ): void {
+  editEmployee(employee: Employee): void {
+    this.openForm(employee);
+  }
+
+  deleteEmployee(id: number): void {
     const confirmed =
-      confirm(
-        'Are you sure you want to delete this employee?'
-      );
+      confirm('Are you sure you want to delete this employee?');
 
     if (!confirmed) {
       return;

@@ -14,6 +14,8 @@ public class AttendanceDto
 
     public DateTime? CheckOutTime { get; set; }
 
+    public int StatusId { get; set; }
+
     public string Status { get; set; } = string.Empty;
 
     public string? Remarks { get; set; }
