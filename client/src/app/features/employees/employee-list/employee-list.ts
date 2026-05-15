@@ -154,9 +154,20 @@ export class EmployeeList
           this.loadEmployees();
         },
 
-        error: () => {
+        error: err => {
+          let message = 'Delete failed';
+          const errors = err.error?.errors;
+
+          if (errors) {
+            const firstKey = Object.keys(errors)[0];
+
+            if (firstKey) {
+              message = errors[firstKey][0];
+            }
+          }
+
           this.snackBar.open(
-            'Failed to delete employee',
+            message,
             'Close',
             {
               duration: 3000
