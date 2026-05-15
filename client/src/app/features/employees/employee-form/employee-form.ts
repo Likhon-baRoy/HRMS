@@ -62,6 +62,14 @@ export class EmployeeForm extends BaseFormComponent<any> implements OnInit {
     accountNumber: ['']
   });
 
+  maxBirthDate = new Date(
+    new Date()
+      .setFullYear(
+        new Date()
+          .getFullYear() - 18
+      )
+  );
+
   override ngOnInit(): void {
     super.ngOnInit(); // Setup base values
     this.loadDropdowns();

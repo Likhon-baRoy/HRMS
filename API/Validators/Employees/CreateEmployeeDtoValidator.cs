@@ -80,5 +80,11 @@ public class CreateEmployeeDtoValidator : AbstractValidator<CreateEmployeeDto>
         RuleFor(x => x.EmploymentType)
             .IsInEnum()
             .WithMessage("Invalid employment type");
+
+        RuleFor(x => x.DateOfBirth)
+            .Must(date =>
+                date <= DateTime.Today.AddYears(-18)
+            )
+            .WithMessage("Employee must be at least 18 years old");
     }
 }

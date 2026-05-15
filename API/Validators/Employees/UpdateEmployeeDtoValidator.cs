@@ -42,5 +42,12 @@ public class UpdateEmployeeDtoValidator : AbstractValidator<UpdateEmployeeDto>
         RuleFor(x => x.EmployeeStatus)
             .IsInEnum()
             .When(x => x.EmployeeStatus.HasValue);
+
+
+        RuleFor(x => x.DateOfBirth)
+            .Must(date =>
+                date <= DateTime.Today.AddYears(-18)
+            )
+            .WithMessage("Employee must be at least 18 years old");
     }
 }
