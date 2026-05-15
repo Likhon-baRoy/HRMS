@@ -1,1 +1,54 @@
-<p>position-form works!</p>
+<h2 mat-dialog-title>
+  {{
+  data
+  ? 'Edit Position'
+  : 'Add Position'
+  }}
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="form-grid">
+    <mat-form-field>
+      <mat-label>
+        Position Title
+      </mat-label>
+
+      <input matInput formControlName="title" />
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>
+        Job Level
+      </mat-label>
+
+      <input matInput formControlName="jobLevel" />
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>
+        Department
+      </mat-label>
+
+      <mat-select formControlName="departmentId">
+        @for (
+        department of departments;
+        track department.id
+        ) {
+        <mat-option [value]="department.id">
+          {{ department.name }}
+        </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>
+    Cancel
+  </button>
+
+  <button mat-raised-button color="primary" (click)="save()">
+    Save
+  </button>
+</mat-dialog-actions>
