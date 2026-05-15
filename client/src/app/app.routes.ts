@@ -33,6 +33,13 @@ export const routes: Routes = [
       },
 
       {
+        path: 'employees',
+        loadComponent: () =>
+          import('./features/employees/employee-list/employee-list')
+            .then(m => m.EmployeeList)
+      },
+
+      {
         path: 'departments',
         loadComponent: () =>
           import('./features/departments/department-list/department-list')
@@ -40,10 +47,10 @@ export const routes: Routes = [
       },
 
       {
-        path: 'employees',
+        path: 'positions',
         loadComponent: () =>
-          import('./features/employees/employee-list/employee-list')
-            .then(m => m.EmployeeList)
+          import('./features/positions/position-list/position-list')
+            .then(m => m.PositionList)
       }
     ]
   },

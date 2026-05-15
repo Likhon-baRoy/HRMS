@@ -8,4 +8,8 @@ export interface Position {
   departmentId: number;
 
   departmentName: string;
+
+  recordStatusId: number;
+
+  recordStatus: string;
 }

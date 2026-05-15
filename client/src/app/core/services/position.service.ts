@@ -10,13 +10,32 @@ import { Position } from '../models/position.model';
 })
 export class PositionService {
   private http = inject(HttpClient);
-
   private apiUrl = `${environment.apiUrl}/position`;
 
   getAll():
     Observable<PagedResult<Position>> {
     return this.http.get<PagedResult<Position>>(
       this.apiUrl
+    );
+  }
+
+  create(data: any): Observable<any> {
+    return this.http.post(
+      this.apiUrl,
+      data
+    );
+  }
+
+  update(id: number, data: any): Observable<any> {
+    return this.http.put(
+      `${this.apiUrl}/${id}`,
+      data
+    );
+  }
+
+  delete(id: number): Observable<any> {
+    return this.http.delete(
+      `${this.apiUrl}/${id}`
     );
   }
 }
