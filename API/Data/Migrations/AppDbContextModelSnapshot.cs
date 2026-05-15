@@ -259,9 +259,6 @@ namespace API.Data.Migrations
                     b.Property<int>("PositionId")
                         .HasColumnType("int");
 
-                    b.Property<int>("RecordStatus")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
@@ -278,12 +275,9 @@ namespace API.Data.Migrations
                     b.HasIndex("EmployeeCode")
                         .IsUnique();
 
-                    b.HasIndex("Phone")
-                        .IsUnique();
-
                     b.HasIndex("PositionId");
 
-                    b.HasIndex("Phone", "RecordStatus")
+                    b.HasIndex("Phone", "EmployeeStatus")
                         .IsUnique();
 
                     b.ToTable("employees", (string)null);

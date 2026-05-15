@@ -31,6 +31,7 @@ export interface Employee {
   employeeStatusId: number;
   employeeStatus: string;
 
-  recordStatusId: number;
-  recordStatus: string;
+
+
+  
 }

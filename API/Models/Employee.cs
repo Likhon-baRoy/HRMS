@@ -2,7 +2,7 @@ using API.Models.Enums;
 
 namespace API.Models;
 
-public class Employee : BaseEntity
+public class Employee : BaseTrackableEntity
 {
     public string EmployeeCode { get; set; } = string.Empty;
 

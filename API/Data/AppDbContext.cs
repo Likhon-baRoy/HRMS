@@ -36,7 +36,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUserSe
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
         modelBuilder.Entity<Employee>()
-            .HasQueryFilter(x => x.RecordStatus == RecordStatus.Active);
+            .HasQueryFilter(x =>
+                x.EmployeeStatus != EmployeeStatus.Resigned &&
+                x.EmployeeStatus != EmployeeStatus.Terminated);
 
         modelBuilder.Entity<Department>()
             .HasQueryFilter(x => x.RecordStatus == RecordStatus.Active);

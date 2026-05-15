@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260513233227_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260515200245_InitialSchema")]
+    partial class InitialSchema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -206,7 +206,6 @@ namespace API.Data.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AccountNumber")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
@@ -236,7 +235,10 @@ namespace API.Data.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)");
 
-                    b.Property<int>("EmploymentStatus")
+                    b.Property<int>("EmployeeStatus")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EmploymentType")
                         .HasColumnType("int");
 
                     b.Property<string>("FirstName")
@@ -260,9 +262,6 @@ namespace API.Data.Migrations
                     b.Property<int>("PositionId")
                         .HasColumnType("int");
 
-                    b.Property<int>("RecordStatus")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
@@ -279,12 +278,9 @@ namespace API.Data.Migrations
                     b.HasIndex("EmployeeCode")
                         .IsUnique();
 
-                    b.HasIndex("Phone")
-                        .IsUnique();
-
                     b.HasIndex("PositionId");
 
-                    b.HasIndex("Phone", "RecordStatus")
+                    b.HasIndex("Phone", "EmployeeStatus")
                         .IsUnique();
 
                     b.ToTable("employees", (string)null);

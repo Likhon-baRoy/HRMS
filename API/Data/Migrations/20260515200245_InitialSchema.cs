@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace API.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialSchema : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -157,16 +157,16 @@ namespace API.Data.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     DateOfBirth = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     HireDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    EmploymentStatus = table.Column<int>(type: "int", nullable: false),
-                    AccountNumber = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                    EmploymentType = table.Column<int>(type: "int", nullable: false),
+                    EmployeeStatus = table.Column<int>(type: "int", nullable: false),
+                    AccountNumber = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     DepartmentId = table.Column<int>(type: "int", nullable: false),
                     PositionId = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     CreatedBy = table.Column<int>(type: "int", nullable: true),
-                    UpdatedBy = table.Column<int>(type: "int", nullable: true),
-                    RecordStatus = table.Column<int>(type: "int", nullable: false)
+                    UpdatedBy = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -381,15 +381,9 @@ namespace API.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_employees_Phone",
+                name: "IX_employees_Phone_EmployeeStatus",
                 table: "employees",
-                column: "Phone",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_employees_Phone_RecordStatus",
-                table: "employees",
-                columns: new[] { "Phone", "RecordStatus" },
+                columns: new[] { "Phone", "EmployeeStatus" },
                 unique: true);
 
             migrationBuilder.CreateIndex(

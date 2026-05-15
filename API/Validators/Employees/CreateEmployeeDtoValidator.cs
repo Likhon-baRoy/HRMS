@@ -38,7 +38,7 @@ public class CreateEmployeeDtoValidator : AbstractValidator<CreateEmployeeDto>
             {
                 return !await context
                     .Employees
-                    .AnyAsync(x => x.Email == email && x.RecordStatus == RecordStatus.Active,
+                    .AnyAsync(x => x.Email == email,
                         cancellation);
             })
             .WithMessage("Email already exists");
@@ -52,7 +52,10 @@ public class CreateEmployeeDtoValidator : AbstractValidator<CreateEmployeeDto>
                 if (string.IsNullOrWhiteSpace(phone)) return true;
 
                 return !await context.Employees
-                    .AnyAsync(x => x.Phone == phone && x.RecordStatus == RecordStatus.Active,
+                    .AnyAsync(x =>
+                            x.Phone == phone &&
+                            x.EmployeeStatus != EmployeeStatus.Terminated &&
+                            x.EmployeeStatus != EmployeeStatus.Resigned,
                         cancellation);
             })
             .WithMessage("Phone already exists");

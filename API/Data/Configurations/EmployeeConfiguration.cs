@@ -37,16 +37,13 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
         builder.HasIndex(x => new
             {
                 x.Phone,
-                x.RecordStatus
+                x.EmployeeStatus
             })
             .IsUnique();
 
         builder.Property(x => x.Phone)
             .HasMaxLength(11)
             .IsRequired();
-
-        builder.HasIndex(x => x.Phone)
-            .IsUnique();
 
         builder.Property(x => x.AccountNumber)
             .HasMaxLength(100)
@@ -57,10 +54,6 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
             .IsRequired();
 
         builder.Property(x => x.EmployeeStatus)
-            .HasConversion<int>()
-            .IsRequired();
-
-        builder.Property(x => x.RecordStatus)
             .HasConversion<int>()
             .IsRequired();
 

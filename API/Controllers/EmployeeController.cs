@@ -39,6 +39,7 @@ public class EmployeeController(IEmployeeService service) : BaseApiController
     [HttpPut("{id:int}")]
     public async Task<ActionResult> Update(int id, UpdateEmployeeDto dto)
     {
+        dto.Id = id;
         await service.UpdateAsync(id, dto);
         return NoContent();
     }

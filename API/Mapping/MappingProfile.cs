@@ -54,18 +54,6 @@ public class MappingProfile : Profile
                 opt => opt.MapFrom(src =>
                     src.EmployeeStatus.GetDisplayName()
                 )
-            )
-            .ForMember(
-                dest => dest.RecordStatusId,
-                opt => opt.MapFrom(src =>
-                    (int)src.RecordStatus
-                )
-            )
-            .ForMember(
-                dest => dest.RecordStatus,
-                opt => opt.MapFrom(src =>
-                    src.RecordStatus.GetDisplayName()
-                )
             );
 
         // Data flow: Client → DTO → Entity → Database

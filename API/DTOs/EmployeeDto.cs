@@ -37,8 +37,4 @@ public class EmployeeDto
     public int PositionId { get; set; }
 
     public string? PositionTitle { get; set; }
-
-    public int RecordStatusId { get; set; }
-
-    public string RecordStatus { get; set; } = string.Empty;
 }

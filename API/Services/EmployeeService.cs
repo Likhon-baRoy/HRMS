@@ -72,7 +72,11 @@ public class EmployeeService(AppDbContext context, IMapper mapper, ICurrentUserS
         {
             var phoneExists =
                 await context.Employees
-                    .AnyAsync(x => x.Id != id && x.Phone == dto.Phone && x.RecordStatus == RecordStatus.Active);
+                    .AnyAsync(x =>
+                        x.Id != dto.Id &&
+                        x.Phone == dto.Phone &&
+                        x.EmployeeStatus != EmployeeStatus.Resigned &&
+                        x.EmployeeStatus != EmployeeStatus.Terminated);
 
             if (phoneExists)
             {
@@ -115,7 +119,7 @@ public class EmployeeService(AppDbContext context, IMapper mapper, ICurrentUserS
         var employee = await context.Employees
             .GetByIdOrThrowAsync(id);
 
-        employee.RecordStatus = RecordStatus.Inactive;
+        employee.EmployeeStatus = EmployeeStatus.Terminated;
 
         await context.SaveChangesAsync();
     }
