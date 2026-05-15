@@ -1,7 +1,10 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
-import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { DepartmentService } from '../../../core/services/department.service';
 import { Department } from '../../../core/models/department.model';
@@ -9,34 +12,25 @@ import { DepartmentForm } from '../department-form/department-form';
 
 @Component({
   selector: 'app-department-list',
-
   standalone: true,
-
   imports: [
+    CommonModule,
     MatTableModule,
     MatCardModule,
     MatButtonModule,
+    MatIconModule,
+    MatSnackBarModule,
     MatDialogModule
   ],
-
   templateUrl: './department-list.html',
-
   styleUrl: './department-list.scss'
 })
-export class DepartmentList
-  implements OnInit {
+export class DepartmentList implements OnInit {
+  private readonly departmentService = inject(DepartmentService);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly dialog = inject(MatDialog);
 
-  private service = inject(DepartmentService);
-
-  private dialog = inject(MatDialog);
-
-  displayedColumns = [
-    'id',
-    'name',
-    'managerName',
-    'actions'
-  ];
-
+  displayedColumns: string[] = ['id', 'name', 'managerName', 'actions'];
   departments: Department[] = [];
 
   ngOnInit(): void {
@@ -44,74 +38,59 @@ export class DepartmentList
   }
 
   loadDepartments(): void {
-    this.service
-      .getAll()
-      .subscribe({
-        next:
-          response => {
-            this.departments =
-              response.items;
-          }
-      });
+    this.departmentService.getAll().subscribe({
+      next: (response) => this.departments = response.items,
+      error: () => this.showSnackBar('Failed to load Departments')
+    });
+  }
+
+  // Helper form handler
+  private openForm(department?: Department): void {
+    const dialogRef = this.dialog.open(DepartmentForm, {
+      data: department,
+      width: '700px'
+    });
+
+    dialogRef.afterClosed().subscribe((isSaved) => {
+      if (isSaved) {
+        this.loadDepartments();
+      }
+    });
   }
 
   create(): void {
-    const dialog =
-      this.dialog.open(
-        DepartmentForm
-      );
-
-    dialog
-      .afterClosed()
-      .subscribe(result => {
-        if (!result)
-          return;
-
-        this.service
-          .create(result)
-          .subscribe(() => {
-            this.loadDepartments();
-          });
-      });
+    this.openForm();
   }
 
   edit(department: Department): void {
-    const dialog =
-      this.dialog.open(
-        DepartmentForm,
-        {
-          data:
-            department
-        }
-      );
-
-    dialog
-      .afterClosed()
-      .subscribe(result => {
-        if (!result)
-          return;
-
-        this.service
-          .update(
-            department.id,
-            result
-          )
-          .subscribe(() => {
-            this.loadDepartments();
-          });
-      });
+    this.openForm(department);
   }
 
   delete(id: number): void {
-
-    if (!confirm('Delete department?')) {
+    if (!confirm('Are you sure you want to delete this department?')) {
       return;
     }
 
-    this.service
-      .delete(id)
-      .subscribe(() => {
+    this.departmentService.delete(id).subscribe({
+      next: () => {
+        this.showSnackBar('Department deleted successfully');
         this.loadDepartments();
-      });
+      },
+      error: (err) => {
+        let message = 'Delete failed';
+        const errors = err.error?.errors;
+        if (errors) {
+          const firstKey = Object.keys(errors)[0];
+          if (firstKey && errors[firstKey] && errors[firstKey][0]) {
+            message = errors[firstKey][0]; // Captures "Department contains employees"
+          }
+        }
+        this.showSnackBar(message);
+      }
+    });
+  }
+
+  private showSnackBar(message: string): void {
+    this.snackBar.open(message, 'Close', { duration: 3000 });
   }
 }
