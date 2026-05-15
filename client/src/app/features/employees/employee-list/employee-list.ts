@@ -8,6 +8,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { EmployeeService } from '../employee.service';
 import { Employee } from '../employee.model';
 import { EmployeeForm } from '../employee-form/employee-form';
+import { getApiError } from '../../../core/utils/error-handler.util';
 
 @Component({
   selector: 'app-employee-list',
@@ -49,11 +50,10 @@ export class EmployeeList implements OnInit {
   loadEmployees(): void {
     this.employeeService.getAll().subscribe({
       next: (response) => this.employees = response.items,
-      error: () => this.showSnackBar('Failed to load Employees')
+      error: (err) => this.showSnackBar(getApiError(err, 'Failed to load Employees'))
     });
   }
 
-  // Base method for dialog handling
   private openForm(employee?: Employee): void {
     const dialogRef = this.dialog.open(EmployeeForm, {
       data: employee,
@@ -61,9 +61,7 @@ export class EmployeeList implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe((isSaved) => {
-      if (isSaved) {
-        this.loadEmployees();
-      }
+      if (isSaved) this.loadEmployees();
     });
   }
 
@@ -85,17 +83,7 @@ export class EmployeeList implements OnInit {
         this.showSnackBar('Employee deleted successfully');
         this.loadEmployees();
       },
-      error: (err) => {
-        let message = 'Delete failed';
-        const errors = err.error?.errors;
-        if (errors) {
-          const firstKey = Object.keys(errors)[0];
-          if (firstKey && errors[firstKey] && errors[firstKey][0]) {
-            message = errors[firstKey][0];
-          }
-        }
-        this.showSnackBar(message);
-      }
+      error: (err) => this.showSnackBar(getApiError(err, 'Delete failed'))
     });
   }
 

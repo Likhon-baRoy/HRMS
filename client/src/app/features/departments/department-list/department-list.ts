@@ -9,6 +9,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { DepartmentService } from '../../../core/services/department.service';
 import { Department } from '../../../core/models/department.model';
 import { DepartmentForm } from '../department-form/department-form';
+import { getApiError } from '../../../core/utils/error-handler.util';
 
 @Component({
   selector: 'app-department-list',
@@ -40,11 +41,10 @@ export class DepartmentList implements OnInit {
   loadDepartments(): void {
     this.departmentService.getAll().subscribe({
       next: (response) => this.departments = response.items,
-      error: () => this.showSnackBar('Failed to load Departments')
+      error: (err) => this.showSnackBar(getApiError(err, 'Failed to load Departments'))
     });
   }
 
-  // Helper form handler
   private openForm(department?: Department): void {
     const dialogRef = this.dialog.open(DepartmentForm, {
       data: department,
@@ -52,9 +52,7 @@ export class DepartmentList implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe((isSaved) => {
-      if (isSaved) {
-        this.loadDepartments();
-      }
+      if (isSaved) this.loadDepartments();
     });
   }
 
@@ -76,17 +74,7 @@ export class DepartmentList implements OnInit {
         this.showSnackBar('Department deleted successfully');
         this.loadDepartments();
       },
-      error: (err) => {
-        let message = 'Delete failed';
-        const errors = err.error?.errors;
-        if (errors) {
-          const firstKey = Object.keys(errors)[0];
-          if (firstKey && errors[firstKey] && errors[firstKey][0]) {
-            message = errors[firstKey][0]; // Captures "Department contains employees"
-          }
-        }
-        this.showSnackBar(message);
-      }
+      error: (err) => this.showSnackBar(getApiError(err, 'Delete failed'))
     });
   }
 
