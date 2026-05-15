@@ -6,7 +6,7 @@
   </button>
 </div>
 
-<table mat-table [dataSource]="employees" class="mat-elevation-z2 full-width">
+<table mat-table [dataSource]="items" class="mat-elevation-z2 full-width">
   <ng-container matColumnDef="employeeCode">
     <th mat-header-cell *matHeaderCellDef>
       Code
@@ -114,13 +114,6 @@
     </td>
   </ng-container>
 
-  <tr mat-header-row *matHeaderRowDef="
-      displayedColumns
-    "></tr>
-
-  <tr mat-row *matRowDef="
-      let row;
-      columns:
-      displayedColumns
-    "></tr>
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 </table>

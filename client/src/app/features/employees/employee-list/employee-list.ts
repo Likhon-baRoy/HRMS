@@ -1,14 +1,15 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { EmployeeService } from '../employee.service';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+
+import { BaseListComponent } from '../../../core/base/base-list.component';
 import { Employee } from '../employee.model';
+import { EmployeeService } from '../employee.service';
 import { EmployeeForm } from '../employee-form/employee-form';
-import { getApiError } from '../../../core/utils/error-handler.util';
 
 @Component({
   selector: 'app-employee-list',
@@ -24,70 +25,10 @@ import { getApiError } from '../../../core/utils/error-handler.util';
   templateUrl: './employee-list.html',
   styleUrl: './employee-list.scss'
 })
-export class EmployeeList implements OnInit {
-  private readonly employeeService = inject(EmployeeService);
-  private readonly snackBar = inject(MatSnackBar);
-  private readonly dialog = inject(MatDialog);
+export class EmployeeList extends BaseListComponent<Employee> {
+  protected service = inject(EmployeeService);
+  protected formComponent = EmployeeForm;
+  protected entityName = 'Employee';
 
-  displayedColumns: string[] = [
-    'employeeCode',
-    'name',
-    'email',
-    'phone',
-    'department',
-    'position',
-    'employmentType',
-    'employeeStatus',
-    'actions'
-  ];
-
-  employees: Employee[] = [];
-
-  ngOnInit(): void {
-    this.loadEmployees();
-  }
-
-  loadEmployees(): void {
-    this.employeeService.getAll().subscribe({
-      next: (response) => this.employees = response.items,
-      error: (err) => this.showSnackBar(getApiError(err, 'Failed to load Employees'))
-    });
-  }
-
-  private openForm(employee?: Employee): void {
-    const dialogRef = this.dialog.open(EmployeeForm, {
-      data: employee,
-      width: '700px'
-    });
-
-    dialogRef.afterClosed().subscribe((isSaved) => {
-      if (isSaved) this.loadEmployees();
-    });
-  }
-
-  create(): void {
-    this.openForm();
-  }
-
-  edit(employee: Employee): void {
-    this.openForm(employee);
-  }
-
-  delete(id: number): void {
-    if (!confirm('Are you sure you want to delete this employee?')) {
-      return;
-    }
-
-    this.employeeService.delete(id).subscribe({
-      next: () => {
-        this.showSnackBar('Employee deleted successfully');
-        this.loadEmployees();
-      },
-      error: (err) => this.showSnackBar(getApiError(err, 'Delete failed'))
-    });
-  }
-
-  private showSnackBar(message: string): void {
-    this.snackBar.open(message, 'Close', { duration: 3000 });
-  }
+  displayedColumns: string[] = ['employeeCode', 'name', 'email', 'phone', 'department', 'position', 'employmentType', 'employeeStatus', 'actions' ];
 }
