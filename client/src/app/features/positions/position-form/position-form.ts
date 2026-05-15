@@ -61,6 +61,8 @@ export class PositionForm {
 
   departments: any[] = [];
 
+  jobLevels = ['Intern', 'Junior', 'Mid', 'Senior', 'Lead', 'Manager'];
+
   form = this.fb.group({
     title: [
       '',
@@ -112,12 +114,12 @@ export class PositionForm {
     const request =
       this.data
         ? this.service.update(
-            this.data.id,
-            this.form.value
-          )
+          this.data.id,
+          this.form.value
+        )
         : this.service.create(
-            this.form.value
-          );
+          this.form.value
+        );
 
     request.subscribe({
       next: () => {
@@ -150,7 +152,7 @@ export class PositionForm {
           if (firstKey) {
             message =
               errors[
-                firstKey
+              firstKey
               ][0];
           }
         }

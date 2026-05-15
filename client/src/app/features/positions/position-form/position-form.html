@@ -21,7 +21,16 @@
         Job Level
       </mat-label>
 
-      <input matInput formControlName="jobLevel" />
+      <mat-select formControlName="jobLevel">
+        @for (
+        level of jobLevels;
+        track level
+        ) {
+        <mat-option [value]="level">
+          {{ level }}
+        </mat-option>
+        }
+      </mat-select>
     </mat-form-field>
 
     <mat-form-field>
