@@ -8,7 +8,7 @@ public interface IAttendanceService
 {
     Task CheckInAsync(CheckInDto dto);
 
-    Task CheckOutAsync(CheckOutDto dto);
+    Task CheckOutAsync();
 
     Task<PagedResult<AttendanceDto>> GetAllAsync(PaginationParams param);
 

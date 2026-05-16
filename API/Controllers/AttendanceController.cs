@@ -13,19 +13,15 @@ public class AttendanceController(IAttendanceService service) : BaseApiControlle
     [HttpPost("check-in")]
     public async Task<ActionResult<ApiResponse<object>>> CheckIn(CheckInDto dto)
     {
-        await service
-            .CheckInAsync(
-                dto);
+        await service.CheckInAsync(dto);
 
         return Success("Checked in successfully");
     }
 
     [HttpPost("check-out")]
-    public async Task<ActionResult<ApiResponse<object>>> CheckOut(CheckOutDto dto)
+    public async Task<ActionResult<ApiResponse<object>>> CheckOut()
     {
-        await service
-            .CheckOutAsync(
-                dto);
+        await service.CheckOutAsync();
 
         return Success("Checked out successfully");
     }

@@ -81,7 +81,6 @@ Data/
 DTOs/Attendance/
  AttendanceDto.cs
  CheckInDto.cs
- CheckOutDto.cs
 DTOs/
  AuthResponseDto.cs
  CreateEmployeeDto.cs
@@ -163,13 +162,11 @@ Services/
  PasswordService.cs
  PayrollService.cs
  PositionService.cs
-Validators/Attendance/
- CheckInDtoValidator.cs
- CheckOutDtoValidator.cs
-Validators/Auth/
- LoginDtoValidator.cs
- RegisterUserDtoValidator.cs
 Validators/
+ Attendance/CheckInDtoValidator.cs
+ Auth/
+  LoginDtoValidator.cs
+  RegisterUserDtoValidator.cs
  Departments/CreateDepartmentDtoValidator.cs
  Employees/
   CreateEmployeeDtoValidator.cs

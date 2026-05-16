@@ -1,7 +1,9 @@
 using API.Data;
 using API.DTOs.Attendance;
 using API.Exceptions;
+using API.Extensions;
 using API.Models;
+using API.Models.Enums;
 using API.Requests;
 using API.Responses;
 using API.Services.Interfaces;
@@ -11,31 +13,57 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Services;
 
-public class AttendanceService(AppDbContext context, IMapper mapper) : IAttendanceService
+public class AttendanceService(AppDbContext context, IMapper mapper, ICurrentUserService currentUser)
+    : IAttendanceService
 {
     public async Task CheckInAsync(CheckInDto dto)
     {
-        var today =
-            DateOnly.FromDateTime(
-                DateTime.UtcNow);
+        var employeeId = currentUser.EmployeeId ?? throw new UnauthorizedAccessException("Unauthorized");
 
-        var exists =
-            await context
-                .Attendances
-                .AnyAsync(x =>
-                    x.EmployeeId
-                    == dto.EmployeeId
-                    && x.Date
-                    == today);
+        var employee =
+            await context.Employees
+                .GetByIdOrThrowAsync(employeeId);
 
-        if (exists)
+        if (
+            employee.EmployeeStatus
+            is EmployeeStatus.Terminated
+            or EmployeeStatus.Resigned
+            or EmployeeStatus.Suspended
+        )
         {
             throw new
                 AppValidationException(
                     "Validation failed",
                     new Dictionary<
                         string,
-                        string[]>
+                        string[]
+                    >
+                    {
+                        {
+                            "attendance",
+                            [
+                                "Employee is inactive"
+                            ]
+                        }
+                    }
+                );
+        }
+
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+        var exists =
+            await context
+                .Attendances
+                .AnyAsync(x =>
+                    x.EmployeeId == employeeId &&
+                    x.Date == today);
+
+        if (exists)
+        {
+            throw new
+                AppValidationException(
+                    "Validation failed",
+                    new Dictionary<string, string[]>
                     {
                         {
                             "attendance",
@@ -46,49 +74,61 @@ public class AttendanceService(AppDbContext context, IMapper mapper) : IAttendan
                     });
         }
 
-        var attendance =
-            new Attendance
-            {
-                EmployeeId =
-                    dto.EmployeeId,
+        var now = DateTime.UtcNow;
 
-                Date = today,
+        var status = AttendanceStatus.Present;
 
-                CheckInTime =
-                    DateTime.UtcNow,
+        if (now.TimeOfDay > new TimeSpan(9, 30, 0))
+        {
+            status = AttendanceStatus.Late;
+        }
 
-                Remarks =
-                    dto.Remarks
-            };
+        var attendance = new Attendance
+        {
+            EmployeeId = employeeId,
+            Date = today,
+            CheckInTime = now,
+            Status = status,
+            Remarks = dto.Remarks
+        };
 
-        context.Attendances
-            .Add(attendance);
+        context.Attendances.Add(attendance);
 
-        await context
-            .SaveChangesAsync();
+        await context.SaveChangesAsync();
     }
 
-    public async Task CheckOutAsync(CheckOutDto dto)
+    public async Task CheckOutAsync()
     {
-        var today =
-            DateOnly.FromDateTime(
-                DateTime.UtcNow);
+        var employeeId = currentUser.EmployeeId ?? throw new UnauthorizedAccessException("Unauthorized");
+
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
         var attendance =
             await context
                 .Attendances
                 .FirstOrDefaultAsync(x =>
-                    x.EmployeeId
-                    == dto.EmployeeId
-                    && x.Date
-                    == today)
-            ?? throw new NotFoundException(
-                nameof(Attendance),
-                dto.EmployeeId);
+                    x.EmployeeId == employeeId &&
+                    x.Date == today);
 
-        if (attendance
-                .CheckOutTime
-            != null)
+
+        if (attendance == null)
+        {
+            throw new
+                AppValidationException(
+                    "Validation failed",
+                    new Dictionary<string, string[]>
+                    {
+                        {
+                            "attendance",
+                            [
+                                "Check-in required first"
+                            ]
+                        }
+                    }
+                );
+        }
+
+        if (attendance.CheckOutTime != null)
         {
             throw new
                 AppValidationException(
@@ -104,7 +144,14 @@ public class AttendanceService(AppDbContext context, IMapper mapper) : IAttendan
                     });
         }
 
-        attendance.CheckOutTime = DateTime.UtcNow;
+        var now = DateTime.UtcNow;
+        attendance.CheckOutTime = now;
+        var workedHours = now - attendance.CheckInTime;
+
+        if (workedHours.TotalHours < 4)
+        {
+            attendance.Status = AttendanceStatus.HalfDay;
+        }
 
         await context.SaveChangesAsync();
     }
