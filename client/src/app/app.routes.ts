@@ -51,6 +51,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/positions/position-list/position-list')
             .then(m => m.PositionList)
+      },
+
+      {
+        path: 'attendance',
+        loadComponent: () =>
+          import('./features/attendance/attendance-list/attendance-list')
+            .then(m => m.AttendanceList)
       }
     ]
   },
