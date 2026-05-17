@@ -1,6 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import {
   MatSnackBar,
   MatSnackBarModule,
@@ -9,14 +12,18 @@ import { MatTableModule } from '@angular/material/table';
 
 import { AttendanceService } from '../../../core/services/attendance.service';
 import { Attendance } from '../../../core/models/attendance.model';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-attendance-list',
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     MatTableModule,
     MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
     MatSnackBarModule,
   ],
   templateUrl: './attendance-list.html',
@@ -25,17 +32,30 @@ import { Attendance } from '../../../core/models/attendance.model';
 export class AttendanceList implements OnInit {
   private readonly service = inject(AttendanceService);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly authService = inject(AuthService);
 
   attendances: Attendance[] = [];
 
-  displayedColumns: string[] = [
-    'employee',
-    'date',
-    'checkIn',
-    'checkOut',
-    'status',
-    'remarks',
-  ];
+  remarks = '';
+
+  readonly isEmployee = this.authService.isEmployee();
+
+  readonly displayedColumns: string[] = this.isEmployee
+    ? [
+        'date',
+        'checkIn',
+        'checkOut',
+        'status',
+        'remarks',
+      ]
+    : [
+        'employee',
+        'date',
+        'checkIn',
+        'checkOut',
+        'status',
+        'remarks',
+      ];
 
   ngOnInit(): void {
     this.loadAttendance();
@@ -60,7 +80,7 @@ export class AttendanceList implements OnInit {
   }
 
   checkIn(): void {
-    this.service.checkIn('Arrived at office').subscribe({
+    this.service.checkIn(this.remarks.trim()).subscribe({
       next: () => {
         this.snackBar.open(
           'Checked in',
@@ -70,6 +90,7 @@ export class AttendanceList implements OnInit {
           }
         );
 
+        this.remarks = '';
         this.loadAttendance();
       },
 

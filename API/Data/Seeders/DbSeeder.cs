@@ -17,7 +17,10 @@ public static class DbSeeder
             .AnyAsync();
 
         if (alreadySeeded)
+        {
+            await EnsureDemoAccountsAsync(context);
             return;
+        }
 
         var passwordService = context.GetService<IPasswordService>();
         var utcNow = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
@@ -259,5 +262,234 @@ public static class DbSeeder
 
         context.UserAccounts.AddRange(users);
         await context.SaveChangesAsync();
+    }
+
+    private static async Task EnsureDemoAccountsAsync(AppDbContext context)
+    {
+        var passwordService = context.GetService<IPasswordService>();
+        var utcNow = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
+        const int systemUserId = 1;
+
+        var departments = await context.Departments
+            .IgnoreQueryFilters()
+            .ToListAsync();
+
+        var positions = await context.Positions
+            .IgnoreQueryFilters()
+            .ToListAsync();
+
+        if (departments.Count == 0 || positions.Count == 0)
+            return;
+
+        var admin = await EnsureDemoEmployeeAsync(
+            context,
+            departments,
+            positions,
+            "EMP-0001",
+            "System",
+            "Admin",
+            "admin@hrms.com",
+            "01700000001",
+            "Head Office",
+            "Administration",
+            "System Administrator",
+            EmploymentType.Permanent,
+            utcNow,
+            systemUserId);
+
+        var hr = await EnsureDemoEmployeeAsync(
+            context,
+            departments,
+            positions,
+            "EMP-0002",
+            "Sarah",
+            "Khan",
+            "hr@hrms.com",
+            "01700000002",
+            "Dhaka",
+            "Human Resource",
+            "HR Manager",
+            EmploymentType.Permanent,
+            utcNow,
+            systemUserId);
+
+        var manager = await EnsureDemoEmployeeAsync(
+            context,
+            departments,
+            positions,
+            "EMP-0003",
+            "John",
+            "Doe",
+            "manager@hrms.com",
+            "01700000003",
+            "Khulna",
+            "Accounts",
+            "Accountant",
+            EmploymentType.Permanent,
+            utcNow,
+            systemUserId);
+
+        var employee = await EnsureDemoEmployeeAsync(
+            context,
+            departments,
+            positions,
+            "EMP-0004",
+            "Employee",
+            "User",
+            "employee@hrms.com",
+            "01700000004",
+            "Chittagong",
+            "Operations",
+            "Operations Executive",
+            EmploymentType.Probation,
+            utcNow,
+            systemUserId);
+
+        await EnsureDemoUserAsync(
+            context,
+            passwordService,
+            admin.Id,
+            "admin",
+            "Admin@123",
+            UserRole.Admin,
+            utcNow,
+            systemUserId);
+
+        await EnsureDemoUserAsync(
+            context,
+            passwordService,
+            hr.Id,
+            "hr",
+            "Hr@123",
+            UserRole.Hr,
+            utcNow,
+            systemUserId);
+
+        await EnsureDemoUserAsync(
+            context,
+            passwordService,
+            manager.Id,
+            "manager",
+            "Manager@123",
+            UserRole.Manager,
+            utcNow,
+            systemUserId);
+
+        await EnsureDemoUserAsync(
+            context,
+            passwordService,
+            employee.Id,
+            "employee",
+            "Employee@123",
+            UserRole.Employee,
+            utcNow,
+            systemUserId);
+
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task<Employee> EnsureDemoEmployeeAsync(
+        AppDbContext context,
+        List<Department> departments,
+        List<Position> positions,
+        string employeeCode,
+        string firstName,
+        string lastName,
+        string email,
+        string phone,
+        string address,
+        string departmentName,
+        string positionTitle,
+        EmploymentType employmentType,
+        DateTime utcNow,
+        int systemUserId)
+    {
+        var employee = await context.Employees
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(x =>
+                x.EmployeeCode == employeeCode ||
+                x.Email == email);
+
+        var department = departments
+            .FirstOrDefault(x => x.Name == departmentName)
+            ?? departments[0];
+
+        var position = positions
+            .FirstOrDefault(x => x.Title == positionTitle)
+            ?? positions[0];
+
+        if (employee == null)
+        {
+            employee = new Employee
+            {
+                EmployeeCode = employeeCode,
+                FirstName = firstName,
+                LastName = lastName,
+                Email = email,
+                Phone = phone,
+                Address = address,
+                DateOfBirth = DateTime.SpecifyKind(new DateTime(1995, 1, 1), DateTimeKind.Utc),
+                HireDate = utcNow,
+                EmploymentType = employmentType,
+                EmployeeStatus = EmployeeStatus.Active,
+                DepartmentId = department.Id,
+                PositionId = position.Id,
+                CreatedAt = utcNow,
+                CreatedBy = systemUserId
+            };
+
+            context.Employees.Add(employee);
+            await context.SaveChangesAsync();
+
+            return employee;
+        }
+
+        employee.FirstName = firstName;
+        employee.LastName = lastName;
+        employee.EmployeeStatus = EmployeeStatus.Active;
+        employee.DepartmentId = department.Id;
+        employee.PositionId = position.Id;
+        employee.UpdatedAt = utcNow;
+        employee.UpdatedBy = systemUserId;
+
+        return employee;
+    }
+
+    private static async Task EnsureDemoUserAsync(
+        AppDbContext context,
+        IPasswordService passwordService,
+        int employeeId,
+        string username,
+        string password,
+        UserRole role,
+        DateTime utcNow,
+        int systemUserId)
+    {
+        var user = await context.UserAccounts
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(x => x.Username == username);
+
+        if (user == null)
+        {
+            context.UserAccounts.Add(new UserAccount
+            {
+                EmployeeId = employeeId,
+                Username = username,
+                PasswordHash = passwordService.Hash(password),
+                Role = role,
+                RecordStatus = RecordStatus.Active,
+                CreatedAt = utcNow,
+                CreatedBy = systemUserId
+            });
+
+            return;
+        }
+
+        user.EmployeeId = employeeId;
+        user.PasswordHash = passwordService.Hash(password);
+        user.Role = role;
+        user.RecordStatus = RecordStatus.Active;
+        user.UpdatedAt = utcNow;
+        user.UpdatedBy = systemUserId;
     }
 }

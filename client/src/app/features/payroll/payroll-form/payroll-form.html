@@ -1,0 +1,25 @@
+<h2 mat-dialog-title>
+  Generate Payroll
+</h2>
+
+<form [formGroup]="form" (ngSubmit)="save()" class="payroll-form">
+  <mat-form-field appearance="outline">
+    <mat-label>Pay Period Start</mat-label>
+    <input matInput type="date" formControlName="payPeriodStart">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Pay Period End</mat-label>
+    <input matInput type="date" formControlName="payPeriodEnd">
+  </mat-form-field>
+
+  <div class="actions">
+    <button mat-button type="button" mat-dialog-close>
+      Cancel
+    </button>
+
+    <button mat-raised-button color="primary" type="submit">
+      Generate
+    </button>
+  </div>
+</form>

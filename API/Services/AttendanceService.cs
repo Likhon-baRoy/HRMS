@@ -162,6 +162,14 @@ public class AttendanceService(AppDbContext context, IMapper mapper, ICurrentUse
             context.Attendances
                 .AsNoTracking();
 
+        if (currentUser.Role == UserRole.Employee.ToString())
+        {
+            var employeeId = currentUser.EmployeeId
+                ?? throw new UnauthorizedAccessException("Unauthorized");
+
+            query = query.Where(x => x.EmployeeId == employeeId);
+        }
+
         var totalCount =
             await query
                 .CountAsync();
@@ -197,6 +205,14 @@ public class AttendanceService(AppDbContext context, IMapper mapper, ICurrentUse
 
     public async Task<IEnumerable<AttendanceDto>> GetEmployeeAttendanceAsync(int employeeId)
     {
+        if (
+            currentUser.Role == UserRole.Employee.ToString()
+            && currentUser.EmployeeId != employeeId
+        )
+        {
+            throw new UnauthorizedAccessException("Unauthorized");
+        }
+
         return await context
             .Attendances
             .Where(x =>

@@ -6,6 +6,37 @@
   </button>
 </div>
 
+<div class="filters" [formGroup]="filters">
+  <mat-form-field appearance="outline">
+    <mat-label>Search</mat-label>
+    <input matInput formControlName="search" placeholder="Code, name, email, phone">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Department</mat-label>
+    <mat-select formControlName="departmentId">
+      <mat-option [value]="null">All</mat-option>
+      @for (department of departments; track department.id) {
+        <mat-option [value]="department.id">
+          {{ department.name }}
+        </mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Status</mat-label>
+    <mat-select formControlName="employeeStatus">
+      <mat-option [value]="null">All</mat-option>
+      @for (status of statuses; track status.value) {
+        <mat-option [value]="status.value">
+          {{ status.label }}
+        </mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</div>
+
 <table mat-table [dataSource]="items" class="mat-elevation-z2 full-width">
   <ng-container matColumnDef="employeeCode">
     <th mat-header-cell *matHeaderCellDef>
@@ -108,9 +139,11 @@
         <mat-icon> edit </mat-icon>
       </button>
 
+      @if (row.employeeStatusId !== 4 && row.employeeStatusId !== 5) {
       <button mat-icon-button color="warn" (click)="delete(row.id)">
         <mat-icon> delete </mat-icon>
       </button>
+      }
     </td>
   </ng-container>
 

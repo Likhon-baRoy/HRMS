@@ -6,9 +6,9 @@ public class SalaryRevision : BaseTrackableEntity
 
     public Salary Salary { get; set; } = null!;
 
-    public decimal OldSalary { get; set; }
+    public decimal OldGrossSalary { get; set; }
 
-    public decimal NewSalary { get; set; }
+    public decimal NewGrossSalary { get; set; }
 
     public string Reason { get; set; } = string.Empty;
 

@@ -20,7 +20,36 @@ public class EmployeeService(AppDbContext context, IMapper mapper, ICurrentUserS
     public async Task<PagedResult<EmployeeDto>> GetAllAsync(PaginationParams param)
     {
         var query = context.Employees
+            .IgnoreQueryFilters()
             .AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(param.Search))
+        {
+            var search = param.Search.Trim().ToLower();
+
+            query = query.Where(x =>
+                x.EmployeeCode.ToLower().Contains(search) ||
+                x.FirstName.ToLower().Contains(search) ||
+                x.LastName.ToLower().Contains(search) ||
+                x.Email.ToLower().Contains(search) ||
+                x.Phone.ToLower().Contains(search));
+        }
+
+        if (param.DepartmentId.HasValue)
+        {
+            query = query.Where(x => x.DepartmentId == param.DepartmentId.Value);
+        }
+
+        if (param.EmployeeStatus.HasValue)
+        {
+            query = query.Where(x => (int)x.EmployeeStatus == param.EmployeeStatus.Value);
+        }
+        else
+        {
+            query = query.Where(x =>
+                x.EmployeeStatus != EmployeeStatus.Resigned &&
+                x.EmployeeStatus != EmployeeStatus.Terminated);
+        }
 
         var totalCount = await query.CountAsync();
 

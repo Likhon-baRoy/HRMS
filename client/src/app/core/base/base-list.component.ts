@@ -16,6 +16,7 @@ export abstract class BaseListComponent<T> implements OnInit {
   protected abstract service: CrudService<T>;
   protected abstract formComponent: ComponentType<any>;
   protected abstract entityName: string; // e.g., 'Employee', 'Department'
+  protected dialogWidth = '600px';
 
   // These are shared properties
   abstract displayedColumns: string[];
@@ -36,10 +37,11 @@ export abstract class BaseListComponent<T> implements OnInit {
     });
   }
 
-  private openForm(data?: T): void {
+  protected openForm(data?: T): void {
     const dialogRef = this.dialog.open(this.formComponent, {
       data: data,
-      width: '600px'
+      width: this.dialogWidth,
+      maxWidth: '95vw'
     });
 
     dialogRef.afterClosed().subscribe((isSaved) => {

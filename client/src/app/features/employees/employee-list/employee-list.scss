@@ -8,3 +8,14 @@
 .full-width {
   width: 100%;
 }
+
+.filters {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.filters mat-form-field {
+  width: 100%;
+}

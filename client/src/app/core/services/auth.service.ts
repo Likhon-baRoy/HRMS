@@ -54,6 +54,24 @@ export class AuthService
             'token',
             response.data.token
           );
+
+        localStorage
+          .setItem(
+            'role',
+            response.data.role
+          );
+
+        localStorage
+          .setItem(
+            'roleId',
+            String(response.data.roleId)
+          );
+
+        localStorage
+          .setItem(
+            'username',
+            response.data.username
+          );
       })
     );
   }
@@ -62,6 +80,15 @@ export class AuthService
   {
     localStorage
       .removeItem('token');
+
+    localStorage
+      .removeItem('role');
+
+    localStorage
+      .removeItem('roleId');
+
+    localStorage
+      .removeItem('username');
 
     this.router
       .navigate(['/login']);
@@ -77,5 +104,44 @@ export class AuthService
   {
     return !!this
       .getToken();
+  }
+
+  getRole(): string | null
+  {
+    const storedRole = localStorage
+      .getItem('role');
+
+    if (storedRole) {
+      return storedRole;
+    }
+
+    const token = this.getToken();
+
+    if (!token) {
+      return null;
+    }
+
+    try {
+      const payload = JSON.parse(
+        atob(token.split('.')[1])
+      );
+
+      return payload.role
+        ?? payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']
+        ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  isEmployee(): boolean
+  {
+    return this.getRole() === 'Employee';
+  }
+
+  isStaff(): boolean
+  {
+    return ['Admin', 'HR', 'Manager']
+      .includes(this.getRole() ?? '');
   }
 }

@@ -13,9 +13,32 @@ export class EmployeeService {
 
   private readonly apiUrl = `${environment.apiUrl}/employee`;
 
-  getAll():
+  getAll(page = 1, pageSize = 10, filters?: {
+    search?: string;
+    departmentId?: number | null;
+    employeeStatus?: number | null;
+  }):
     Observable<PagedResult<Employee>> {
-    return this.http.get<any>(this.apiUrl);
+    const params = new URLSearchParams({
+      page: String(page),
+      pageSize: String(pageSize)
+    });
+
+    if (filters?.search) {
+      params.set('search', filters.search);
+    }
+
+    if (filters?.departmentId) {
+      params.set('departmentId', String(filters.departmentId));
+    }
+
+    if (filters?.employeeStatus) {
+      params.set('employeeStatus', String(filters.employeeStatus));
+    }
+
+    return this.http.get<PagedResult<Employee>>(
+      `${this.apiUrl}?${params.toString()}`
+    );
   }
 
   getById(id: number):

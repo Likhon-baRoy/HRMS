@@ -9,6 +9,7 @@ using API.Services.Interfaces;
 using API.Validators;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 
@@ -24,9 +25,12 @@ builder.Services
     });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection")
-    )
+    options
+        .UseNpgsql(
+            builder.Configuration.GetConnectionString("DefaultConnection")
+        )
+        .ConfigureWarnings(warnings =>
+            warnings.Ignore(RelationalEventId.PendingModelChangesWarning))
 );
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
@@ -40,6 +44,8 @@ builder.Services.AddScoped<IPositionService, PositionService>();
 builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+
+builder.Services.AddScoped<ISalaryService, SalaryService>();
 
 builder.Services.AddScoped<IPayrollService, PayrollService>();
 
@@ -97,6 +103,8 @@ using (var scop = app.Services.CreateScope())
     var context =
         scop.ServiceProvider
             .GetRequiredService<AppDbContext>();
+
+    await context.Database.MigrateAsync();
 
     await DbSeeder.SeedAsync(context);
 }

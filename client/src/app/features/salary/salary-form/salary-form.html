@@ -1,0 +1,58 @@
+<h2 mat-dialog-title>
+  {{ data ? 'Edit Salary' : 'Assign Salary' }}
+</h2>
+
+<form [formGroup]="form" (ngSubmit)="save()" class="salary-form">
+  <mat-form-field appearance="outline">
+    <mat-label>Employee</mat-label>
+    <mat-select formControlName="employeeId">
+      @for (employee of employees; track employee.id) {
+        <mat-option [value]="employee.id">
+          {{ employee.firstName }} {{ employee.lastName }}
+        </mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <div class="grid">
+    <mat-form-field appearance="outline">
+      <mat-label>Basic Salary</mat-label>
+      <input matInput type="number" formControlName="basicSalary">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>House Rent</mat-label>
+      <input matInput type="number" formControlName="houseRent">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Medical Allowance</mat-label>
+      <input matInput type="number" formControlName="medicalAllowance">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Transport Allowance</mat-label>
+      <input matInput type="number" formControlName="transportAllowance">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Other Allowance</mat-label>
+      <input matInput type="number" formControlName="otherAllowance">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Effective Date</mat-label>
+      <input matInput type="date" formControlName="effectiveDate">
+    </mat-form-field>
+  </div>
+
+  <div class="actions">
+    <button mat-button type="button" mat-dialog-close>
+      Cancel
+    </button>
+
+    <button mat-raised-button color="primary" type="submit">
+      {{ data ? 'Update Salary' : 'Assign Salary' }}
+    </button>
+  </div>
+</form>

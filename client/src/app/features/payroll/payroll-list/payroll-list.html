@@ -1,0 +1,60 @@
+<div class="page-header">
+  <h2>Payroll</h2>
+
+  <button mat-raised-button color="primary" (click)="generate()">
+    Generate Payroll
+  </button>
+</div>
+
+<table mat-table [dataSource]="items" class="mat-elevation-z2 full-width">
+  <ng-container matColumnDef="employee">
+    <th mat-header-cell *matHeaderCellDef>Employee</th>
+    <td mat-cell *matCellDef="let row">{{ row.employeeName }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="period">
+    <th mat-header-cell *matHeaderCellDef>Period</th>
+    <td mat-cell *matCellDef="let row">
+      {{ row.payPeriodStart | date:'mediumDate' }} -
+      {{ row.payPeriodEnd | date:'mediumDate' }}
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="gross">
+    <th mat-header-cell *matHeaderCellDef>Gross</th>
+    <td mat-cell *matCellDef="let row">{{ row.grossSalary | number:'1.2-2' }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="bonus">
+    <th mat-header-cell *matHeaderCellDef>Bonus</th>
+    <td mat-cell *matCellDef="let row">{{ row.totalBonus | number:'1.2-2' }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="deductions">
+    <th mat-header-cell *matHeaderCellDef>Deductions</th>
+    <td mat-cell *matCellDef="let row">{{ row.totalDeductions | number:'1.2-2' }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="tax">
+    <th mat-header-cell *matHeaderCellDef>Tax</th>
+    <td mat-cell *matCellDef="let row">{{ row.taxAmount | number:'1.2-2' }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="net">
+    <th mat-header-cell *matHeaderCellDef>Net</th>
+    <td mat-cell *matCellDef="let row">{{ row.netSalary | number:'1.2-2' }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="status">
+    <th mat-header-cell *matHeaderCellDef>Status</th>
+    <td mat-cell *matCellDef="let row">{{ row.status }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="generatedAt">
+    <th mat-header-cell *matHeaderCellDef>Generated</th>
+    <td mat-cell *matCellDef="let row">{{ row.generatedAt | date:'medium' }}</td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>

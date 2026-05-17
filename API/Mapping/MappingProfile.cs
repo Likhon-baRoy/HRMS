@@ -3,6 +3,7 @@ using API.DTOs.Attendance;
 using API.DTOs.Departments;
 using API.DTOs.Payroll;
 using API.DTOs.Positions;
+using API.DTOs.Salary;
 using API.Extensions;
 using API.Models;
 using AutoMapper;
@@ -154,6 +155,37 @@ public class MappingProfile : Profile
                 dest => dest.Status,
                 opt => opt.MapFrom(src =>
                     src.Status.GetDisplayName()
+                )
+            );
+
+        // =========================
+        // Salary
+        // =========================
+
+        CreateMap<CreateSalaryDto, Salary>()
+            .ForMember(dest => dest.GrossSalary,
+                opt => opt.MapFrom(src =>
+                    src.BasicSalary
+                    + src.HouseRent
+                    + src.MedicalAllowance
+                    + src.TransportAllowance
+                    + src.OtherAllowance
+                ));
+
+        CreateMap<UpdateSalaryDto, Salary>()
+            .ForMember(dest => dest.GrossSalary,
+                opt => opt.MapFrom(src =>
+                    src.BasicSalary
+                    + src.HouseRent
+                    + src.MedicalAllowance
+                    + src.TransportAllowance
+                    + src.OtherAllowance
+                ));
+
+        CreateMap<Salary, SalaryDto>()
+            .ForMember(dest => dest.EmployeeName,
+                opt => opt.MapFrom( src =>
+                        $"{src.Employee.FirstName} {src.Employee.LastName}"
                 )
             );
     }

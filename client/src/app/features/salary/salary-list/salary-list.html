@@ -1,0 +1,94 @@
+<div class="page-header">
+  <h2>Salary</h2>
+
+  <button mat-raised-button color="primary" (click)="create()">
+    Assign Salary
+  </button>
+</div>
+
+<table mat-table [dataSource]="items" class="mat-elevation-z2 full-width">
+  <ng-container matColumnDef="employee">
+    <th mat-header-cell *matHeaderCellDef>
+      Employee
+    </th>
+
+    <td mat-cell *matCellDef="let row">
+      {{ row.employeeName }}
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="basicSalary">
+    <th mat-header-cell *matHeaderCellDef>
+      Basic
+    </th>
+
+    <td mat-cell *matCellDef="let row">
+      {{ row.basicSalary | number:'1.2-2' }}
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="houseRent">
+    <th mat-header-cell *matHeaderCellDef>
+      House Rent
+    </th>
+
+    <td mat-cell *matCellDef="let row">
+      {{ row.houseRent | number:'1.2-2' }}
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="medicalAllowance">
+    <th mat-header-cell *matHeaderCellDef>
+      Medical
+    </th>
+
+    <td mat-cell *matCellDef="let row">
+      {{ row.medicalAllowance | number:'1.2-2' }}
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="transportAllowance">
+    <th mat-header-cell *matHeaderCellDef>
+      Transport
+    </th>
+
+    <td mat-cell *matCellDef="let row">
+      {{ row.transportAllowance | number:'1.2-2' }}
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="grossSalary">
+    <th mat-header-cell *matHeaderCellDef>
+      Gross
+    </th>
+
+    <td mat-cell *matCellDef="let row">
+      {{ row.grossSalary | number:'1.2-2' }}
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="effectiveDate">
+    <th mat-header-cell *matHeaderCellDef>
+      Effective Date
+    </th>
+
+    <td mat-cell *matCellDef="let row">
+      {{ row.effectiveDate | date:'mediumDate' }}
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="actions">
+    <th mat-header-cell *matHeaderCellDef>
+      Action
+    </th>
+
+    <td mat-cell *matCellDef="let row">
+      <button mat-icon-button color="primary" (click)="edit(row)">
+        <mat-icon>edit</mat-icon>
+      </button>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>

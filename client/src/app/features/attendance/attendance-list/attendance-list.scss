@@ -2,6 +2,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   margin-bottom: 20px;
 }
 
@@ -9,7 +10,28 @@
   width: 100%;
 }
 
-.page-header div {
+.actions {
   display: flex;
+  align-items: center;
   gap: 10px;
+}
+
+.actions mat-form-field {
+  width: 260px;
+}
+
+@media (max-width: 720px) {
+  .page-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .actions mat-form-field {
+    width: 100%;
+  }
 }

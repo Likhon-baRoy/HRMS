@@ -66,8 +66,14 @@ export class Login {
       })
       .subscribe({
         next: () => {
+          const role = this.auth.getRole();
+
           this.router
-            .navigate(['/dashboard']);
+            .navigate([
+              role === 'Employee'
+                ? '/attendance'
+                : '/dashboard'
+            ]);
         },
         error: console.error
       });

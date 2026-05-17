@@ -22,4 +22,10 @@ public class PaginationParams
             else _pageSize = value > MaxPageSize ? MaxPageSize : value;
         }
     }
+
+    public string? Search { get; set; }
+
+    public int? DepartmentId { get; set; }
+
+    public int? EmployeeStatus { get; set; }
 }

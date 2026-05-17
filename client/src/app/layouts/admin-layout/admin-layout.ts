@@ -28,6 +28,9 @@ import { AuthService } from '../../core/services/auth.service';
 export class AdminLayout {
   private auth = inject(AuthService);
 
+  protected readonly isEmployee = this.auth.isEmployee();
+  protected readonly isStaff = this.auth.isStaff();
+
   logout(): void {
     this.auth.logout();
   }
