@@ -30,6 +30,10 @@ import {
   AuthResponse
 } from '../models/auth-response.model';
 
+import {
+  UserProfile
+} from '../models/user-profile.model';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -100,6 +104,13 @@ export class AuthService
       .getItem('token');
   }
 
+  getProfile(): Observable<ApiResponse<UserProfile>>
+  {
+    return this.http.get<ApiResponse<UserProfile>>(
+      `${environment.apiUrl}/auth/profile`
+    );
+  }
+
   isLoggedIn(): boolean
   {
     return !!this
@@ -137,6 +148,17 @@ export class AuthService
   isEmployee(): boolean
   {
     return this.getRole() === 'Employee';
+  }
+
+  isAdmin(): boolean
+  {
+    return this.getRole() === 'Admin';
+  }
+
+  isHrOrAdmin(): boolean
+  {
+    return ['Admin', 'HR']
+      .includes(this.getRole() ?? '');
   }
 
   isStaff(): boolean

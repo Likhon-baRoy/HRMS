@@ -29,6 +29,8 @@ export class AdminLayout {
   private auth = inject(AuthService);
 
   protected readonly isEmployee = this.auth.isEmployee();
+  protected readonly isAdmin = this.auth.isAdmin();
+  protected readonly isHrOrAdmin = this.auth.isHrOrAdmin();
   protected readonly isStaff = this.auth.isStaff();
 
   logout(): void {

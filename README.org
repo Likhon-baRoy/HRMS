@@ -1,0 +1,185 @@
+#+TITLE: Human Resource Management System (HRMS)
+#+AUTHOR: Project Team
+#+DESCRIPTION: Minimal HRMS assessment project built with ASP.NET 9, Entity Framework Core, PostgreSQL, and Angular 21.
+
+* Project Overview
+This project is a web-based Human Resource Management System (HRMS) designed to help an HR department manage employees, salaries, payrolls, attendance, and user access control.
+
+The application is structured into two main parts:
+1. *Backend API*: Responsible for data persistence, request validation, business logic execution (like payroll calculation), and route protection via authentication and authorization layers.
+2. *Angular Frontend*: Provides a clean, graphical interface where users log in, interact with role-based dashboards, manage records, assign salaries, run payroll processing, and check attendance.
+
+The project balances an accessible learning curve for beginners while adhering strictly to professional software design patterns, including separation of concerns, Data Transfer Objects (DTOs), explicit validation layers, business services, reusable base components, and role-based access control (RBAC).
+
+
+* Technology Stack
+** Backend
+- *Framework*: ASP.NET 9 Core Web API
+- *ORM*: Entity Framework Core (EF Core)
+- *Database*: PostgreSQL
+- *Authentication*: JWT Authentication
+- *Validation*: FluentValidation
+- *Mapping*: AutoMapper
+
+** Frontend
+- *Framework*: Angular 21
+- *UI Library*: Angular Material
+- *Language*: TypeScript
+- *Forms*: Reactive Forms
+
+
+* Project Architecture & Directories
+The system is cleanly separated into structural layers to enforce unique responsibilities:
+
+- *=API/=*: Contains the ASP.NET Core Web API backend codebase.
+  - *Controllers*: Handle incoming HTTP requests, map payload structures, and hand over execution to services.
+  - *Services*: Houses core business rules (e.g., salary evaluation, payroll calculation logic).
+  - *DTOs*: Data Transfer Objects preventing direct leakage of database entities to the client side.
+  - *Models*: System entity classes mapped directly to PostgreSQL database tables.
+  - *Data*: Manages =AppDbContext=, migrations, configuration schemes, and data seeding algorithms.
+  - *Validators*: FluentValidation logic running safely before processing backend actions.
+  - *Middleware*: Implements global =ExceptionMiddleware= to normalize responses on errors.
+- *=client/=*: Houses the modular Angular 21 frontend architecture.
+  - *Core*: Shareable UI models, auth guards, HTTP interceptors, and generalized base classes.
+  - *Features*: Discrete domain modules (Employees, Salary, Payroll, Attendance, Dashboard, Profile).
+  - *Layouts*: Presentational templates including administration toolbars and navigation sidebars.
+
+
+* Local Installation & Setup
+
+** Backend Setup
+1. Configure your local database connection string inside =API/appsettings.json=.
+2. Open your terminal, change into the API directory, and boot up the server instance:
+   #+BEGIN_SRC bash
+   cd API
+   dotnet run
+   #+END_SRC
+3. The API framework will run locally and listen on:
+   - http://localhost:5000
+   - https://localhost:5001
+
+** Frontend Setup
+1. Verify host endpoints inside =client/src/environments/environment.ts= if custom rules apply.
+2. Open your terminal, navigate to the client folder, install dependencies, and spin up the dev server:
+   #+BEGIN_SRC bash
+   cd client
+   npm install
+   npm run start
+   #+END_SRC
+3. Open your browser and view the application dashboard at:
+   - http://localhost:4200
+
+
+* Seeded Logins & Role Access
+
+The database seeder automatically creates and repairs these boilerplate accounts:
+
+| Username | Password   | Assigned Role | Permitted Access Scope |
+|----------+------------+---------------+----------------------------------------------------------------------|
+| admin    | Admin@123  | Admin         | Full control; user account management; core administrative structures.|
+| hr       | Hr@123     | HR            | Employee CRUD, departments, positions, salaries, payroll, attendance.|
+| manager  | Manager@123| Manager       | Read-only dashboards, employee metadata indexes, attendance sheets.   |
+| employee | Employee@123| Employee      | Personal profile data view and personal attendance clocking actions. |
+
+> *Note:* The seeded admin account is strictly protected. The engine blocks role alteration, account deletion, or related profile terminations to avoid locked out environments.
+
+
+* Main Modules & Features
+
+1. *Authentication & Authorization*: Handled via JWT tokens. Implements route guards client-side and strict Role-Based Access Control (RBAC) on endpoint controllers.
+2. *Employee Management*: Full CRUD actions, featuring lookups, status tags, and soft-delete capabilities mapped as status terminations.
+3. *Department & Position Management*: Handles contextual structures (e.g., IT, HR, Finance) and functional job levels across departments.
+4. *Salary Management*: Implements a "One-Current-Salary" logic block per employee. Updating salaries triggers audit tracking records via the =SalaryRevision= mechanism.
+5. *Payroll Management*: Generates monthly pay stubs processing allowances, bonuses, taxes, and automatic deductions based on active current salary numbers.
+6. *Attendance Tracking*: Facilitates basic check-in/check-out functionality and individual self-tracking logs.
+7. *User Profile*: A personalized window allowing logged-in staff members to view job data, departments, salary details, and historical tracking elements.
+
+
+* Database Schema & Relationships
+
+The database centers around the =Employee= entity. Most tables point back to it as their primary operational link.
+
+** Main Entities
+- *Employee*: Stores foundational and organizational data (Code, Name, Contact, Status, Join Date, DepartmentId, PositionId).
+- *Department / Position*: Structural collections managing organization layouts.
+- *UserAccount*: Links login credentials directly to an absolute Employee profile via unique role permissions.
+- *Salary / SalaryRevision*: Handles tracking values, dynamic allowances, and chronological historical trends.
+- *Payroll*: Captures static monthly processing summaries (Net Calculation fields, Tax weights, and state states).
+- *Attendance*: Records operational time stamps along with manual text logs.
+
+** Entity Relationship Summary
+- *Employee -> Department / Position* (Many-to-One)
+- *Department -> Position* (One-to-Many)
+- *Employee -> UserAccount* (One-to-One)
+- *Employee -> Salary* (One-to-Many, exactly one marked current)
+- *Salary -> SalaryRevision* (One-to-Many)
+- *Employee -> Payroll* (One-to-Many)
+- *Employee -> Attendance* (One-to-Many)
+
+
+* API Reference Summary
+
+#+BEGIN_EXAMPLE
+POST   /api/auth/login          - User login authentication (returns JWT token)
+POST   /api/auth/register       - Register a user profile instance
+GET    /api/employee            - Fetch paginated employees with search filters
+POST   /api/employee            - Create a new employee record
+PUT    /api/employee/{id}       - Update an existing employee profile
+DELETE /api/employee/{id}       - Soft-delete (terminate) an employee profile
+GET    /api/salary              - Query current active salaries
+POST   /api/salary              - Establish a new baseline salary structure
+PUT    /api/salary/{id}         - Revise salary info (creates a history entry)
+GET    /api/payroll             - Fetch compiled structural payroll tables
+POST   /api/payroll             - Trigger monthly payroll processing execution
+GET    /api/attendance          - Search general attendance data matrices
+POST   /api/attendance/check-in  - Log a new daily clock-in point
+POST   /api/attendance/check-out - Apply closing timestamps to current work logs
+#+END_EXAMPLE
+
+
+* Key System Concepts & Implementation Details
+
+** Pagination, Search, and Filtering
+Queries use =PaginationParams= and return structured =PagedResult= collections across all main modules.
+- *Supported Filters*: Search by code, names, email, phone context. Data can be filtered by targeted departments, execution months, dates, and active statuses.
+
+** Error Handling
+Global error routing interceptors parse downstream failures safely:
+#+BEGIN_SRC json
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": {
+    "email": ["Email already exists"]
+  }
+}
+#+END_SRC
+
+** Reusable Frontend Foundations
+To keep code DRY, Angular views extend centralized template blueprints:
+- *=BaseListComponent=*: Automatically handles standard data fetching, pagination lifecycle events, tracking modals, and general item drop routines.
+- *=BaseFormComponent=*: Standardizes dialog processing schemas, data updates, and field validation resets.
+
+
+* Manual Test Flow Walkthrough
+
+Follow this sequence to test features end-to-end:
+
+1. *Login as Admin*: Connect using credentials =admin= / =Admin@123=.
+2. *Create Employee*: Navigate to the *Employees* page, select *Add Employee*, and fill out the details.
+3. *Create User Account*: Go to the *Users* section, select the new employee, configure user credentials, and assign an access role.
+4. *Assign Base Salary*: Navigate to *Salary*, specify the target employee, and enter their basic salary and allowance percentages.
+5. *Process Monthly Payroll*: Open the *Payroll* panel, choose the target month/year parameters, add bonus or deduction criteria, and trigger generation. Verify the output fields align with this formula:
+   $$NetSalary = GrossSalary + Bonus - Deduction - Tax$$
+6. *Test Employee Experience*: Log out, then log back in using the newly created employee credentials.
+7. *Clock In/Out*: Navigate to the *Attendance* module, add a text note in the remarks field, click *Check In*, and verify the timestamp appears. Click *Check Out* later to close the log entry.
+
+
+* Project Requirement Coverage Checklist
+
+- [X] *Employee Tracking*: Implements Full CRUD features, alphanumeric employee codes, and smart soft-delete tracking via profile terminations.
+- [X] *Salary Management*: Enforces historical logging tracks via automated revision models, active state controls, and numerical balance rules.
+- [X] *Payroll Generation*: Includes duplicate processing checks, custom tax evaluations, structural bonuses, and tabular listing layouts.
+- [X] *Security & Guardrails*: Uses explicit backend token filtering layers (JWT), route access checks (RBAC), and admin account mutation safety rules.
+- [X] *Modern UI UX*: Provides Angular Material data tables, context filter controls, interactive dialog wrappers, and responsive toast notifications.
+- [X] *Bonus Capabilities*: Integrated operational dashboards, individual user profile cards, and live clock-in attendance sheets.

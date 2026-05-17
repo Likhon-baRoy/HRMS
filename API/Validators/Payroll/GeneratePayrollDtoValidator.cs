@@ -18,5 +18,14 @@ public class GeneratePayrollDtoValidator : AbstractValidator<GeneratePayrollDto>
 
         RuleFor(x => x.PayPeriodEnd)
             .NotEmpty();
+
+        RuleFor(x => x.BonusAmount)
+            .GreaterThanOrEqualTo(0);
+
+        RuleFor(x => x.DeductionAmount)
+            .GreaterThanOrEqualTo(0);
+
+        RuleFor(x => x.TaxPercent)
+            .InclusiveBetween(0, 100);
     }
 }

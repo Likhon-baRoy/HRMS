@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin,Hr,Manager")]
 public class DepartmentController(IDepartmentService service) : BaseApiController
 {
     [HttpGet]
@@ -27,6 +27,7 @@ public class DepartmentController(IDepartmentService service) : BaseApiControlle
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin,Hr")]
     public async Task<ActionResult> Create(CreateDepartmentDto dto)
     {
         var department = await service.CreateAsync(dto);
@@ -39,6 +40,7 @@ public class DepartmentController(IDepartmentService service) : BaseApiControlle
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Roles = "Admin,Hr")]
     public async Task<ActionResult> Update(int id, UpdateDepartmentDto dto)
     {
         await service.UpdateAsync(id, dto);
@@ -47,6 +49,7 @@ public class DepartmentController(IDepartmentService service) : BaseApiControlle
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin,Hr")]
     public async Task<ActionResult> Delete(int id)
     {
         await service.DeleteAsync((id));

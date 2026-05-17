@@ -1,14 +1,11 @@
-using API.Data;
 using API.DTOs;
-using API.Models.Enums;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
 
 namespace API.Validators.Employees;
 
 public class UpdateEmployeeDtoValidator : AbstractValidator<UpdateEmployeeDto>
 {
-    public UpdateEmployeeDtoValidator(AppDbContext context)
+    public UpdateEmployeeDtoValidator()
     {
         RuleFor(x => x.EmployeeCode)
             .MaximumLength(20);
@@ -27,18 +24,7 @@ public class UpdateEmployeeDtoValidator : AbstractValidator<UpdateEmployeeDto>
         RuleFor(x => x.Phone)
             .MinimumLength(9)
             .MaximumLength(11)
-            .When(x => !string.IsNullOrWhiteSpace(x.Phone))
-            .MustAsync(async (dto, phone, cancellation) =>
-            {
-                return !await context.Employees
-                    .AnyAsync(x =>
-                            x.Id != dto.Id &&
-                            x.Phone == phone &&
-                            x.EmployeeStatus != EmployeeStatus.Resigned &&
-                            x.EmployeeStatus != EmployeeStatus.Terminated,
-                        cancellation);
-            })
-            .WithMessage("Phone already exists");
+            .When(x => !string.IsNullOrWhiteSpace(x.Phone));
 
         RuleFor(x => x.DepartmentId)
             .GreaterThan(0)

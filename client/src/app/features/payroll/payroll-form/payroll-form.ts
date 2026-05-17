@@ -32,6 +32,9 @@ export class PayrollForm {
   form = this.fb.group({
     payPeriodStart: ['', Validators.required],
     payPeriodEnd: ['', Validators.required],
+    bonusAmount: [0, [Validators.required, Validators.min(0)]],
+    deductionAmount: [0, [Validators.required, Validators.min(0)]],
+    taxPercent: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
   });
 
   save(): void {
@@ -45,6 +48,9 @@ export class PayrollForm {
     const payload: GeneratePayrollPayload = {
       payPeriodStart: raw.payPeriodStart as string,
       payPeriodEnd: raw.payPeriodEnd as string,
+      bonusAmount: Number(raw.bonusAmount ?? 0),
+      deductionAmount: Number(raw.deductionAmount ?? 0),
+      taxPercent: Number(raw.taxPercent ?? 0),
     };
 
     this.service.generate(payload).subscribe({

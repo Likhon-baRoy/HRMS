@@ -169,6 +169,15 @@ public class AttendanceService(AppDbContext context, IMapper mapper, ICurrentUse
 
             query = query.Where(x => x.EmployeeId == employeeId);
         }
+        else if (param.EmployeeId.HasValue)
+        {
+            query = query.Where(x => x.EmployeeId == param.EmployeeId.Value);
+        }
+
+        if (param.AttendanceDate.HasValue)
+        {
+            query = query.Where(x => x.Date == param.AttendanceDate.Value);
+        }
 
         var totalCount =
             await query

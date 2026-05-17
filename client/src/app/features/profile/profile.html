@@ -1,0 +1,95 @@
+<div class="page-header">
+  <h2>My Profile</h2>
+</div>
+
+@if (isLoading) {
+  <div class="loading">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+} @else if (errorMessage) {
+  <p class="error">{{ errorMessage }}</p>
+} @else if (profile) {
+  <mat-card>
+    <mat-card-content>
+      <div class="profile-header">
+        <div>
+          <h3>{{ profile.fullName }}</h3>
+          <p>{{ profile.employeeCode }} - {{ profile.positionTitle }}</p>
+        </div>
+
+        <div class="role-badge">
+          {{ profile.role }}
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <div>
+          <span>Username</span>
+          <strong>{{ profile.username }}</strong>
+        </div>
+
+        <div>
+          <span>Department</span>
+          <strong>{{ profile.departmentName }}</strong>
+        </div>
+
+        <div>
+          <span>Joining Date</span>
+          <strong>{{ profile.hireDate | date:'mediumDate' }}</strong>
+        </div>
+
+        <div>
+          <span>Employment Type</span>
+          <strong>{{ profile.employmentType }}</strong>
+        </div>
+
+        <div>
+          <span>Status</span>
+          <strong>{{ profile.employeeStatus }}</strong>
+        </div>
+
+        <div>
+          <span>Email</span>
+          <strong>{{ profile.email }}</strong>
+        </div>
+
+        <div>
+          <span>Phone</span>
+          <strong>{{ profile.phone }}</strong>
+        </div>
+
+        <div>
+          <span>Account Number</span>
+          <strong>{{ profile.accountNumber || 'Not added' }}</strong>
+        </div>
+
+        <div>
+          <span>Basic Salary</span>
+          <strong>
+            @if (profile.basicSalary !== null && profile.basicSalary !== undefined) {
+              {{ profile.basicSalary | number:'1.2-2' }}
+            } @else {
+              Not assigned
+            }
+          </strong>
+        </div>
+
+        <div>
+          <span>Gross Salary</span>
+          <strong>
+            @if (profile.grossSalary !== null && profile.grossSalary !== undefined) {
+              {{ profile.grossSalary | number:'1.2-2' }}
+            } @else {
+              Not assigned
+            }
+          </strong>
+        </div>
+
+        <div class="wide">
+          <span>Address</span>
+          <strong>{{ profile.address }}</strong>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+}

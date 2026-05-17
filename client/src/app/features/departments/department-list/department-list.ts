@@ -6,6 +6,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 import { BaseListComponent } from '../../../core/base/base-list.component';
 import { Department } from '../../../core/models/department.model';
@@ -22,7 +23,8 @@ import { DepartmentForm } from '../department-form/department-form';
     MatButtonModule,
     MatIconModule,
     MatSnackBarModule,
-    MatDialogModule
+    MatDialogModule,
+    MatPaginatorModule
   ],
   templateUrl: './department-list.html',
   styleUrl: './department-list.scss'

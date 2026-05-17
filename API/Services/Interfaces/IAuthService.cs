@@ -9,4 +9,12 @@ public interface IAuthService
     Task RegisterAsync(RegisterUserDto dto);
 
     CurrentUserDto GetCurrentUser();
+
+    Task<UserProfileDto> GetProfileAsync();
+
+    Task<List<UserAccountDto>> GetUsersAsync();
+
+    Task UpdateRoleAsync(int id, UpdateUserRoleDto dto);
+
+    Task DeleteUserAsync(int id);
 }

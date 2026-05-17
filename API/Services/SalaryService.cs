@@ -25,6 +25,11 @@ public class SalaryService(
             .Include(x => x.Employee)
             .Where(x => x.IsCurrent);
 
+        if (pagination.EmployeeId.HasValue)
+        {
+            query = query.Where(x => x.EmployeeId == pagination.EmployeeId.Value);
+        }
+
         var totalCount = await query.CountAsync();
 
         var salaries = await query

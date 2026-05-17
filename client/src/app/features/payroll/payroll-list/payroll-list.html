@@ -6,6 +6,28 @@
   </button>
 </div>
 
+<div class="summary">
+  <div>
+    <span>Employees</span>
+    <strong>{{ employeeCount }}</strong>
+  </div>
+
+  <div>
+    <span>Gross Total</span>
+    <strong>{{ grossTotal | number:'1.2-2' }}</strong>
+  </div>
+
+  <div>
+    <span>Deductions</span>
+    <strong>{{ deductionTotal | number:'1.2-2' }}</strong>
+  </div>
+
+  <div>
+    <span>Net Payable</span>
+    <strong>{{ netTotal | number:'1.2-2' }}</strong>
+  </div>
+</div>
+
 <table mat-table [dataSource]="items" class="mat-elevation-z2 full-width">
   <ng-container matColumnDef="employee">
     <th mat-header-cell *matHeaderCellDef>Employee</th>
@@ -58,3 +80,11 @@
   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
   <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 </table>
+
+<mat-paginator
+  [length]="totalCount"
+  [pageIndex]="pageIndex"
+  [pageSize]="pageSize"
+  [pageSizeOptions]="pageSizeOptions"
+  (page)="onPageChange($event)"
+></mat-paginator>

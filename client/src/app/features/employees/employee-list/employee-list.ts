@@ -5,6 +5,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -16,6 +17,7 @@ import { EmployeeService } from '../employee.service';
 import { EmployeeForm } from '../employee-form/employee-form';
 import { DepartmentService } from '../../../core/services/department.service';
 import { Department } from '../../../core/models/department.model';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-employee-list',
@@ -30,7 +32,8 @@ import { Department } from '../../../core/models/department.model';
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule
+    MatSelectModule,
+    MatPaginatorModule
   ],
   templateUrl: './employee-list.html',
   styleUrl: './employee-list.scss'
@@ -42,6 +45,10 @@ export class EmployeeList extends BaseListComponent<Employee> {
   protected override dialogWidth = '920px';
   private readonly fb = inject(FormBuilder);
   private readonly departmentService = inject(DepartmentService);
+  private readonly authService = inject(AuthService);
+
+  readonly canManageEmployees = ['Admin', 'HR']
+    .includes(this.authService.getRole() ?? '');
 
   departments: Department[] = [];
   statuses = [
@@ -58,23 +65,31 @@ export class EmployeeList extends BaseListComponent<Employee> {
     employeeStatus: [null as number | null]
   });
 
-  displayedColumns: string[] = ['employeeCode', 'name', 'email', 'phone', 'department', 'position', 'employmentType', 'employeeStatus', 'actions' ];
+  displayedColumns: string[] = this.canManageEmployees
+    ? ['employeeCode', 'name', 'email', 'phone', 'department', 'position', 'employmentType', 'employeeStatus', 'actions']
+    : ['employeeCode', 'name', 'email', 'phone', 'department', 'position', 'employmentType', 'employeeStatus'];
 
   override ngOnInit(): void {
     this.loadDepartments();
     super.ngOnInit();
-    this.filters.valueChanges.subscribe(() => this.loadItems());
+    this.filters.valueChanges.subscribe(() => {
+      this.pageIndex = 0;
+      this.loadItems();
+    });
   }
 
   override loadItems(): void {
     const value = this.filters.getRawValue();
 
-    this.service.getAll(1, 10, {
+    this.service.getAll(this.pageIndex + 1, this.pageSize, {
       search: value.search?.trim() || undefined,
       departmentId: value.departmentId,
       employeeStatus: value.employeeStatus
     }).subscribe({
-      next: (response) => this.items = response.items,
+      next: (response) => {
+        this.items = response.items;
+        this.totalCount = response.meta.totalCount;
+      },
       error: (err) => this.showSnackBar(`Failed to load ${this.entityName}s`)
     });
   }

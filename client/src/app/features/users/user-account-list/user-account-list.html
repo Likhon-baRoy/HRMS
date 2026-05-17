@@ -1,0 +1,111 @@
+<div class="page-header">
+  <h2>User Accounts</h2>
+</div>
+
+<mat-card class="user-table-card">
+  <mat-card-content>
+    <h3>Manage Roles</h3>
+
+    <table mat-table [dataSource]="users" class="full-width">
+      <ng-container matColumnDef="employee">
+        <th mat-header-cell *matHeaderCellDef>Employee</th>
+        <td mat-cell *matCellDef="let user">
+          {{ user.employeeName }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="username">
+        <th mat-header-cell *matHeaderCellDef>Username</th>
+        <td mat-cell *matCellDef="let user">
+          {{ user.username }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="role">
+        <th mat-header-cell *matHeaderCellDef>Role</th>
+        <td mat-cell *matCellDef="let user">
+          <mat-form-field appearance="outline" class="role-field">
+            <mat-select
+              [value]="user.roleId"
+              [disabled]="user.isProtected"
+              (selectionChange)="updateRole(user, $event.value)"
+            >
+              @for (role of roles; track role.value) {
+                <mat-option [value]="role.value">
+                  {{ role.label }}
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          @if (user.isProtected) {
+            <span class="protected-label">Protected</span>
+          }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Action</th>
+        <td mat-cell *matCellDef="let user">
+          <button
+            mat-icon-button
+            color="warn"
+            [disabled]="user.isProtected"
+            (click)="deleteUser(user)"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </mat-card-content>
+</mat-card>
+
+<mat-card>
+  <mat-card-content>
+    <h3>Create Account</h3>
+
+    <form [formGroup]="form" (ngSubmit)="save()" class="user-form">
+      <mat-form-field appearance="outline">
+        <mat-label>Employee</mat-label>
+        <mat-select formControlName="employeeId">
+          @for (employee of employees; track employee.id) {
+            <mat-option [value]="employee.id">
+              {{ employee.employeeCode }} - {{ employee.firstName }} {{ employee.lastName }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Username</mat-label>
+        <input matInput formControlName="username">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Password</mat-label>
+        <input matInput type="password" formControlName="password">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Role</mat-label>
+        <mat-select formControlName="role">
+          @for (role of roles; track role.value) {
+            <mat-option [value]="role.value">
+              {{ role.label }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <div class="actions">
+        <button mat-raised-button color="primary" type="submit">
+          Create Account
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

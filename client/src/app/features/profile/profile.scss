@@ -1,0 +1,78 @@
+.page-header {
+  margin-bottom: 20px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.error {
+  color: #b00020;
+}
+
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.profile-header h3 {
+  margin: 0 0 6px;
+  font-size: 24px;
+}
+
+.profile-header p {
+  margin: 0;
+  color: #666;
+}
+
+.role-badge {
+  border: 1px solid #c9d7ef;
+  color: #1d4f91;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.info-grid div {
+  border-bottom: 1px solid #eeeeee;
+  padding-bottom: 10px;
+}
+
+.info-grid span {
+  display: block;
+  color: #666;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.info-grid strong {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 600px) {
+  .profile-header {
+    display: block;
+  }
+
+  .role-badge {
+    display: inline-block;
+    margin-top: 12px;
+  }
+}

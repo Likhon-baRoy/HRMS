@@ -1,0 +1,53 @@
+.page-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+mat-card {
+  max-width: 760px;
+  margin-bottom: 20px;
+}
+
+.user-table-card {
+  max-width: 100%;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.role-field {
+  max-width: 180px;
+  margin-top: 12px;
+}
+
+.protected-label {
+  color: #666;
+  display: inline-block;
+  font-size: 13px;
+  margin-left: 10px;
+}
+
+.user-form {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.actions {
+  display: flex;
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+}
+
+@media (max-width: 720px) {
+  .user-form {
+    grid-template-columns: 1fr;
+  }
+}

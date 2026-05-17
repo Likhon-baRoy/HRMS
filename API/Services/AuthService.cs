@@ -19,6 +19,8 @@ public class AuthService(
     IPasswordService passwordService,
     ICurrentUserService currentUser) : IAuthService
 {
+    private const string ProtectedAdminUsername = "admin";
+
     public async Task<AuthResponseDto> LoginAsync(LoginDto dto)
     {
         var user = await context.UserAccounts
@@ -129,6 +131,138 @@ public class AuthService(
         };
     }
 
+    public async Task<UserProfileDto> GetProfileAsync()
+    {
+        if (!currentUser.IsAuthenticated || currentUser.UserId is null)
+        {
+            throw new UnauthorizedAccessException("Unauthorized");
+        }
+
+        var user = await context.UserAccounts
+            .AsNoTracking()
+            .Include(x => x.Employee)
+                .ThenInclude(x => x.Department)
+            .Include(x => x.Employee)
+                .ThenInclude(x => x.Position)
+            .FirstOrDefaultAsync(x => x.Id == currentUser.UserId.Value)
+            ?? throw new UnauthorizedAccessException("Unauthorized");
+
+        var salary = await context.Salaries
+            .AsNoTracking()
+            .Where(x => x.EmployeeId == user.EmployeeId && x.IsCurrent)
+            .OrderByDescending(x => x.EffectiveDate)
+            .FirstOrDefaultAsync();
+
+        return new UserProfileDto
+        {
+            UserId = user.Id,
+            EmployeeId = user.EmployeeId,
+            Username = user.Username,
+            RoleId = (int)user.Role,
+            Role = user.Role.GetDisplayName(),
+            EmployeeCode = user.Employee.EmployeeCode,
+            FullName = $"{user.Employee.FirstName} {user.Employee.LastName}",
+            Email = user.Employee.Email,
+            Phone = user.Employee.Phone,
+            Address = user.Employee.Address,
+            HireDate = user.Employee.HireDate,
+            EmploymentType = user.Employee.EmploymentType.GetDisplayName(),
+            EmployeeStatus = user.Employee.EmployeeStatus.GetDisplayName(),
+            AccountNumber = user.Employee.AccountNumber,
+            DepartmentName = user.Employee.Department.Name,
+            PositionTitle = user.Employee.Position.Title,
+            BasicSalary = salary?.BasicSalary,
+            GrossSalary = salary?.GrossSalary,
+            SalaryEffectiveDate = salary?.EffectiveDate
+        };
+    }
+
+    public async Task<List<UserAccountDto>> GetUsersAsync()
+    {
+        var users = await context.UserAccounts
+            .AsNoTracking()
+            .Include(x => x.Employee)
+            .OrderBy(x => x.Employee.EmployeeCode)
+            .ToListAsync();
+
+        return users.Select(x => new UserAccountDto
+        {
+            Id = x.Id,
+            EmployeeId = x.EmployeeId,
+            EmployeeName = $"{x.Employee.FirstName} {x.Employee.LastName}",
+            Username = x.Username,
+            RoleId = (int)x.Role,
+            Role = x.Role.GetDisplayName(),
+            IsProtected = IsProtectedAccount(x)
+        }).ToList();
+    }
+
+    public async Task UpdateRoleAsync(int id, UpdateUserRoleDto dto)
+    {
+        var user = await context.UserAccounts
+            .FirstOrDefaultAsync(x => x.Id == id)
+            ?? throw new NotFoundException(nameof(UserAccount), id);
+
+        if (IsProtectedAccount(user))
+        {
+            throw new AppValidationException(
+                "Validation failed",
+                new Dictionary<string, string[]>
+                {
+                    { "role", ["Protected admin role cannot be changed"] }
+                }
+            );
+        }
+
+        if (currentUser.UserId == user.Id)
+        {
+            throw new AppValidationException(
+                "Validation failed",
+                new Dictionary<string, string[]>
+                {
+                    { "role", ["You cannot change your own role"] }
+                }
+            );
+        }
+
+        user.Role = dto.Role;
+
+        await context.SaveChangesAsync();
+    }
+
+    public async Task DeleteUserAsync(int id)
+    {
+        var user = await context.UserAccounts
+            .FirstOrDefaultAsync(x => x.Id == id)
+            ?? throw new NotFoundException(nameof(UserAccount), id);
+
+        if (IsProtectedAccount(user))
+        {
+            throw new AppValidationException(
+                "Validation failed",
+                new Dictionary<string, string[]>
+                {
+                    { "user", ["Protected admin account cannot be deleted"] }
+                }
+            );
+        }
+
+        if (currentUser.UserId == user.Id)
+        {
+            throw new AppValidationException(
+                "Validation failed",
+                new Dictionary<string, string[]>
+                {
+                    { "user", ["You cannot delete your own account"] }
+                }
+            );
+        }
+
+        user.RecordStatus = RecordStatus.Deleted;
+
+        await context.SaveChangesAsync();
+    }
+
     private AuthResponseDto GenerateToken(UserAccount user)
     {
         var expiryDays = config.GetValue<int>("Jwt:ExpiryInDays");
@@ -178,5 +312,12 @@ public class AuthService(
 
             ExpiresAt = expiresAt
         };
+    }
+
+    private static bool IsProtectedAccount(UserAccount user)
+    {
+        return user.Username.Equals(
+            ProtectedAdminUsername,
+            StringComparison.OrdinalIgnoreCase);
     }
 }

@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 import { BaseListComponent } from '../../../core/base/base-list.component';
 import { Position } from '../../../core/models/position.model';
@@ -20,7 +21,8 @@ import { PositionForm } from '../position-form/position-form';
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatPaginatorModule
   ],
   templateUrl: './position-list.html',
   styleUrl: './position-list.scss'

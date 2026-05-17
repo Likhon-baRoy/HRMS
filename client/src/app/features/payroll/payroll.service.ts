@@ -10,6 +10,9 @@ import { Payroll } from './payroll.model';
 export interface GeneratePayrollPayload {
   payPeriodStart: string;
   payPeriodEnd: string;
+  bonusAmount: number;
+  deductionAmount: number;
+  taxPercent: number;
 }
 
 @Injectable({

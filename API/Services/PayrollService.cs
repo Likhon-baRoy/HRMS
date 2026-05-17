@@ -60,9 +60,9 @@ public class PayrollService(AppDbContext context, IMapper mapper) : IPayrollServ
                 PayPeriodStart = payPeriodStart,
                 PayPeriodEnd = payPeriodEnd,
                 GrossSalary = salary.GrossSalary,
-                TotalBonus = 0m,
-                TotalDeductions = 0m,
-                TaxAmount = 0m,
+                TotalBonus = dto.BonusAmount,
+                TotalDeductions = dto.DeductionAmount,
+                TaxAmount = Math.Round(salary.GrossSalary * dto.TaxPercent / 100m, 2),
                 GeneratedAt = DateTime.UtcNow,
                 Status = PayrollStatus.Processed
             };

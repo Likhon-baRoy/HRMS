@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers;
 
 [Route("api/salary")]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin,Hr")]
 public class SalaryController(ISalaryService service) : BaseApiController
 {
     [HttpGet]

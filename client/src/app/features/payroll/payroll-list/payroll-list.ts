@@ -3,6 +3,7 @@ import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 
@@ -20,6 +21,7 @@ import { PayrollForm } from '../payroll-form/payroll-form';
     MatDialogModule,
     MatIconModule,
     MatSnackBarModule,
+    MatPaginatorModule,
   ],
   templateUrl: './payroll-list.html',
   styleUrl: './payroll-list.scss',
@@ -30,6 +32,10 @@ export class PayrollList {
   private readonly snackBar = inject(MatSnackBar);
 
   items: Payroll[] = [];
+  pageIndex = 0;
+  pageSize = 10;
+  totalCount = 0;
+  readonly pageSizeOptions = [5, 10, 25];
 
   displayedColumns: string[] = [
     'employee',
@@ -47,11 +53,36 @@ export class PayrollList {
     this.loadItems();
   }
 
+  get employeeCount(): number {
+    return this.items.length;
+  }
+
+  get grossTotal(): number {
+    return this.sum('grossSalary');
+  }
+
+  get deductionTotal(): number {
+    return this.sum('totalDeductions');
+  }
+
+  get netTotal(): number {
+    return this.sum('netSalary');
+  }
+
   loadItems(): void {
-    this.service.getAll().subscribe({
-      next: (response) => this.items = response.items,
+    this.service.getAll(this.pageIndex + 1, this.pageSize).subscribe({
+      next: (response) => {
+        this.items = response.items;
+        this.totalCount = response.meta.totalCount;
+      },
       error: () => this.snackBar.open('Failed to load payroll', 'Close', { duration: 3000 }),
     });
+  }
+
+  onPageChange(event: { pageIndex: number; pageSize: number }): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.loadItems();
   }
 
   generate(): void {
@@ -64,5 +95,12 @@ export class PayrollList {
         this.loadItems();
       }
     });
+  }
+
+  private sum(key: keyof Payroll): number {
+    return this.items.reduce(
+      (total, item) => total + Number(item[key] ?? 0),
+      0
+    );
   }
 }

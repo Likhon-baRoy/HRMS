@@ -6,6 +6,21 @@
   </button>
 </div>
 
+<form [formGroup]="filters" class="filters">
+  <mat-form-field appearance="outline">
+    <mat-label>Employee</mat-label>
+    <mat-select formControlName="employeeId">
+      <mat-option [value]="null">All Employees</mat-option>
+
+      @for (employee of employees; track employee.id) {
+        <mat-option [value]="employee.id">
+          {{ employee.employeeCode }} - {{ employee.firstName }} {{ employee.lastName }}
+        </mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</form>
+
 <table mat-table [dataSource]="items" class="mat-elevation-z2 full-width">
   <ng-container matColumnDef="employee">
     <th mat-header-cell *matHeaderCellDef>
@@ -92,3 +107,11 @@
   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
   <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 </table>
+
+<mat-paginator
+  [length]="totalCount"
+  [pageIndex]="pageIndex"
+  [pageSize]="pageSize"
+  [pageSizeOptions]="pageSizeOptions"
+  (page)="onPageChange($event)"
+></mat-paginator>

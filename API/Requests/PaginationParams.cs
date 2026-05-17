@@ -28,4 +28,8 @@ public class PaginationParams
     public int? DepartmentId { get; set; }
 
     public int? EmployeeStatus { get; set; }
+
+    public int? EmployeeId { get; set; }
+
+    public DateOnly? AttendanceDate { get; set; }
 }

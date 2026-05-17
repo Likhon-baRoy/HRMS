@@ -1,0 +1,852 @@
+HRMS PROJECT DOCUMENTATION
+==========================
+
+Project Name
+------------
+Human Resource Management System (HRMS)
+
+Technology Stack
+----------------
+Backend:
+- ASP.NET Core Web API
+- Entity Framework Core
+- PostgreSQL
+- JWT Authentication
+- FluentValidation
+- AutoMapper
+
+Frontend:
+- Angular
+- Angular Material
+- TypeScript
+- Reactive Forms
+
+
+1. Project Overview
+-------------------
+This project is a web-based Human Resource Management System. The main goal is to help an HR department manage employees, salaries, payrolls, attendance, and user access.
+
+The application has two main parts:
+
+1. Backend API
+   The backend is responsible for storing data, validating requests, applying business rules, generating payroll, and protecting routes with authentication and authorization.
+
+2. Angular Frontend
+   The frontend gives users a graphical interface where they can log in, view dashboards, manage employees, assign salaries, generate payroll, check attendance, and manage user roles.
+
+The project is beginner-friendly but still follows useful software design practices such as separation of concerns, DTO usage, validation classes, services, reusable base classes, and role-based authorization.
+
+
+2. Main Modules
+---------------
+The system is divided into these main modules:
+
+1. Authentication and Authorization
+2. Employee Management
+3. Department Management
+4. Position Management
+5. Salary Management
+6. Payroll Management
+7. Attendance Management
+8. User Profile
+9. User Account and Role Management
+10. Dashboard
+
+
+3. Database and ER Design
+-------------------------
+The database is designed around employees. Most HRMS features connect back to the Employee table.
+
+Main Entities:
+
+Employee
+- Stores employee personal and job information.
+- Important fields: EmployeeCode, FirstName, LastName, Email, Phone, Address, DateOfBirth, HireDate, EmploymentType, EmployeeStatus, AccountNumber.
+- Each employee belongs to one department.
+- Each employee has one position.
+- Each employee may have one user account.
+- Each employee can have salary records, payroll records, and attendance records.
+
+Department
+- Stores department information.
+- Important fields: Name, Description, ManagerId, RecordStatus.
+- One department can have many employees.
+- One department can have many positions.
+
+Position
+- Stores job position information inside a department.
+- Important fields: Title, JobLevel, DepartmentId.
+- One position can be assigned to many employees.
+
+UserAccount
+- Stores login and access permission information.
+- Important fields: EmployeeId, Username, PasswordHash, Role, LastLoginAt.
+- Role means access permission, for example Admin, HR, Manager, or Employee.
+- Position is separate from role. Position means job title inside a department.
+
+Salary
+- Stores employee salary components.
+- Important fields: EmployeeId, BasicSalary, HouseRent, MedicalAllowance, TransportAllowance, OtherAllowance, GrossSalary, EffectiveDate, EndDate, IsCurrent.
+- One employee can have salary history, but only one salary is marked as current.
+
+SalaryRevision
+- Stores salary change history.
+- Important fields: SalaryId, OldGrossSalary, NewGrossSalary, Reason, RevisionDate, ApprovedBy.
+- Created when a salary is revised.
+
+Payroll
+- Stores generated monthly payroll data.
+- Important fields: EmployeeId, PayrollMonth, PayrollYear, BasicSalary, GrossSalary, BonusAmount, DeductionAmount, TaxAmount, NetSalary, Status.
+- Payroll is generated from current salary information.
+
+Attendance
+- Stores employee attendance records.
+- Important fields: EmployeeId, AttendanceDate, CheckInTime, CheckOutTime, Status, Remarks.
+
+Bonus, Deduction, PayrollDeduction
+- These support payroll additions and deductions.
+
+
+4. ER Relationship Summary
+--------------------------
+Employee -> Department
+- Many employees belong to one department.
+- Relationship: many-to-one.
+
+Employee -> Position
+- Many employees can have the same position.
+- Relationship: many-to-one.
+
+Department -> Position
+- One department can have many positions.
+- Relationship: one-to-many.
+
+Employee -> UserAccount
+- One employee can have one login account.
+- Relationship: one-to-one.
+
+Employee -> Salary
+- One employee can have many salary records over time.
+- Only one record should be current.
+- Relationship: one-to-many.
+
+Salary -> SalaryRevision
+- One salary can have revision records.
+- Relationship: one-to-many.
+
+Employee -> Payroll
+- One employee can have many monthly payroll records.
+- Relationship: one-to-many.
+
+Employee -> Attendance
+- One employee can have many attendance records.
+- Relationship: one-to-many.
+
+
+5. Backend Architecture
+-----------------------
+The backend is organized in a layered style. This is not a very complex enterprise Clean Architecture setup, but it follows clean separation between responsibilities.
+
+Important folders:
+
+Controllers
+- Receive HTTP requests from the frontend.
+- Call service methods.
+- Return API responses.
+- Example: EmployeeController, SalaryController, PayrollController, AuthController.
+
+Services
+- Contain business logic.
+- Example: EmployeeService manages employee creation, update, deletion, and filtering.
+- Example: SalaryService manages current salary and salary revision rules.
+- Example: PayrollService generates payroll based on current salaries.
+
+DTOs
+- Data Transfer Objects.
+- Used to send and receive clean request/response data.
+- Prevents directly exposing database models to the frontend.
+
+Models
+- Entity classes that represent database tables.
+- Example: Employee, Department, Position, Salary, Payroll, UserAccount.
+
+Data
+- Contains AppDbContext, EF Core configurations, migrations, and database seeding.
+
+Validators
+- FluentValidation classes.
+- Used to validate request DTOs before business logic runs.
+
+Responses
+- Contains common response structures like ApiResponse and PagedResult.
+
+Middleware
+- Contains ExceptionMiddleware.
+- Converts exceptions into clean API error responses.
+
+
+6. API Design Pattern
+---------------------
+The API follows REST-style endpoints.
+
+Common methods:
+
+GET
+- Used to fetch data.
+- Example: GET /api/employee
+
+POST
+- Used to create data or perform an action.
+- Example: POST /api/employee
+- Example: POST /api/payroll
+
+PUT
+- Used to update existing data.
+- Example: PUT /api/employee/{id}
+
+DELETE
+- Used to remove or soft-delete data.
+- Example: DELETE /api/employee/{id}
+
+The controllers are kept simple. They do not contain large business logic. Instead, they call services.
+
+Example flow:
+
+Frontend form submits employee data.
+Angular EmployeeService sends POST request to API.
+EmployeeController receives request.
+FluentValidation validates the DTO.
+EmployeeService applies business rules.
+Entity Framework saves data to PostgreSQL.
+API returns a response to Angular.
+Angular updates the UI.
+
+
+7. Authentication and Authorization
+-----------------------------------
+Authentication means checking who the user is.
+
+Authorization means checking what the user is allowed to do.
+
+Authentication Process:
+
+1. User enters username and password.
+2. Angular sends login request to POST /api/auth/login.
+3. Backend checks username and password hash.
+4. If valid, backend generates a JWT token.
+5. Angular stores the token in localStorage.
+6. Every later API request sends the token in the Authorization header.
+7. Backend reads the token and identifies the user.
+
+Authorization:
+
+The system uses roles:
+- Admin
+- HR
+- Manager
+- Employee
+
+Examples:
+- Admin can manage user accounts and roles.
+- Admin and HR can manage salary and payroll.
+- Manager can view dashboard, employees, and attendance.
+- Employee can access profile and attendance.
+
+Protected Admin Rule:
+
+The seeded admin account is protected.
+Its role cannot be changed.
+Its user account cannot be deleted.
+Its employee record cannot be terminated.
+
+This prevents losing admin access by mistake.
+
+
+8. Validation
+-------------
+Validation is handled with FluentValidation.
+
+Examples:
+
+Employee validation:
+- Employee code is required.
+- Email must be valid.
+- Phone must have correct length.
+- Department must exist.
+- Position must exist.
+- Employee must be at least 18 years old.
+
+Salary validation:
+- Employee must exist.
+- Basic salary must be greater than zero.
+- Allowances cannot be negative.
+- Effective date is required.
+
+Auth validation:
+- Username is required.
+- Password has minimum rules.
+- Role must be valid.
+
+Validation helps avoid bad data entering the database.
+
+
+9. Error Handling
+-----------------
+The backend uses custom exceptions and middleware.
+
+Important exceptions:
+- NotFoundException
+- AppValidationException
+- AccountDisabledException
+
+ExceptionMiddleware catches errors and returns a clean response.
+
+Example error response:
+
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": {
+    "email": ["Email already exists"]
+  }
+}
+
+This makes frontend error display easier.
+
+
+10. Pagination, Search, and Filtering
+-------------------------------------
+Pagination is implemented with PaginationParams and PagedResult.
+
+PaginationParams contains:
+- Page
+- PageSize
+- Search
+- DepartmentId
+- EmployeeStatus
+- EmployeeId
+- AttendanceDate
+
+PagedResult returns:
+- Items
+- Meta information such as page, pageSize, totalCount, and totalPages.
+
+Used in:
+- Employee list
+- Department list
+- Position list
+- Salary list
+- Payroll list
+- Attendance list
+
+Examples:
+
+Employee list supports:
+- Search by employee code, name, email, or phone.
+- Filter by department.
+- Filter by employee status.
+
+Salary list supports:
+- Filter by employee.
+
+Attendance list supports:
+- Filter by employee.
+- Filter by attendance date.
+
+
+11. AutoMapper
+--------------
+AutoMapper is used to convert between models and DTOs.
+
+Example:
+
+Employee entity contains Department and Position objects.
+EmployeeDto contains DepartmentName and PositionTitle.
+
+AutoMapper helps convert this cleanly without writing repetitive manual mapping code everywhere.
+
+
+12. Entity Framework Core
+-------------------------
+Entity Framework Core is used as the ORM.
+
+Main responsibilities:
+- Converts C# models into database tables.
+- Handles relationships.
+- Runs migrations.
+- Performs queries.
+- Saves changes.
+
+AppDbContext contains DbSet properties for all main tables.
+
+Examples:
+- DbSet<Employee> Employees
+- DbSet<UserAccount> UserAccounts
+- DbSet<Salary> Salaries
+- DbSet<Payroll> Payrolls
+
+EF configurations define:
+- Table names
+- Required fields
+- Maximum lengths
+- Indexes
+- Relationships
+- Delete behavior
+
+Global query filters are used for active records, so deleted or inactive records are hidden automatically in normal queries.
+
+
+13. Seeding
+-----------
+The project seeds demo data.
+
+Seeded users:
+- admin / Admin@123
+- hr / Hr@123
+- manager / Manager@123
+- employee / Employee@123
+
+The seeder also repairs missing demo accounts if needed.
+This makes project presentation easier because the system has ready-to-use users.
+
+
+14. Employee Management Module
+------------------------------
+Purpose:
+To allow HR/Admin users to manage employee information.
+
+Features:
+- Add employee
+- Edit employee
+- Soft-delete employee by marking status as terminated
+- Search employees
+- Filter by department
+- Filter by status
+- Show employee code, name, email, phone, department, position, employment type, and status
+
+Important backend files:
+- EmployeeController
+- EmployeeService
+- Employee model
+- CreateEmployeeDto
+- UpdateEmployeeDto
+- EmployeeDto
+- Employee validators
+
+Important frontend files:
+- employee-list
+- employee-form
+- employee.service.ts
+
+
+15. Department and Position Modules
+-----------------------------------
+Purpose:
+To organize employees properly.
+
+Department:
+- Represents business units such as HR, IT, Accounts, Operations.
+
+Position:
+- Represents job titles inside departments, such as HR Manager, Accountant, Software Engineer.
+
+These modules make employee records more realistic and organized.
+
+
+16. Salary Management Module
+----------------------------
+Purpose:
+To assign and update employee salaries.
+
+Salary Components:
+- Basic salary
+- House rent
+- Medical allowance
+- Transport allowance
+- Other allowance
+- Gross salary
+- Effective date
+
+Important rule:
+One employee has one current salary.
+When a salary is updated, the old salary becomes non-current and a new current salary record is created.
+
+This gives salary history and supports salary revisions.
+
+Salary revision:
+When current salary is changed, a SalaryRevision record stores:
+- Old gross salary
+- New gross salary
+- Reason
+- Revision date
+- Approved by user
+
+
+17. Payroll Management Module
+-----------------------------
+Purpose:
+To generate monthly salary payments for employees.
+
+Payroll uses current salary records.
+
+Payroll calculates:
+- Gross salary
+- Bonus
+- Deductions
+- Tax
+- Net salary
+
+Formula:
+Net Salary = Gross Salary + Bonus - Deduction - Tax
+
+Features:
+- Generate payroll by month and year.
+- Avoid duplicate payroll for the same employee/month.
+- Show payroll list.
+- Show salary components and final net salary.
+
+
+18. Attendance Module
+---------------------
+Purpose:
+To track employee daily attendance.
+
+Features:
+- Check in
+- Check out
+- Attendance list
+- Filter attendance
+- Employee self-view
+
+Employees can see their own attendance.
+Managers, HR, and Admin can view broader attendance information depending on access rules.
+
+
+19. User Profile Module
+-----------------------
+Purpose:
+To let the logged-in user see their own information.
+
+The profile page shows:
+- Name
+- Username
+- Access role
+- Employee code
+- Department
+- Position
+- Joining date
+- Employment type
+- Status
+- Email
+- Phone
+- Account number
+- Salary information
+- Address
+
+This solves the problem where a user could log in but could not see who they are or their HR information.
+
+
+20. User Account and Role Management
+------------------------------------
+Purpose:
+To allow Admin to create user accounts and manage access permissions.
+
+Features:
+- Create account for an employee.
+- Assign role during account creation.
+- View existing user accounts.
+- Change user role.
+- Delete user account.
+- Prevent protected admin account modification.
+- Prevent admin from deleting or changing their own account.
+
+Important note:
+Role means permission level.
+Position means job title.
+
+Example:
+An employee can have position "Software Engineer" but role "Employee".
+Another employee can have position "HR Manager" and role "HR".
+
+
+21. Dashboard Module
+--------------------
+Purpose:
+To show summary information for staff users.
+
+The dashboard gives quick overview information, such as employee and HRMS status counts.
+
+This is useful for Admin, HR, and Manager roles.
+
+
+22. Frontend Architecture
+-------------------------
+The Angular application is organized by features.
+
+Important folders:
+
+core
+- Shared models, guards, interceptors, base classes, and services.
+
+features
+- Contains feature modules/pages such as employees, salary, payroll, attendance, auth, dashboard, profile, users.
+
+layouts
+- Contains the admin layout with sidebar and toolbar.
+
+Angular routing:
+- app.routes.ts defines which page loads for each URL.
+- Lazy loading is used with loadComponent.
+
+Guards:
+- authGuard checks if user is logged in.
+- roleGuard checks if user has permission to open a route.
+
+Interceptor:
+- auth.interceptor.ts automatically adds JWT token to API requests.
+
+
+23. Frontend UI Design
+----------------------
+The frontend uses Angular Material for a clean and beginner-friendly interface.
+
+Common UI elements:
+- Sidebar navigation
+- Toolbar with logout
+- Tables for list pages
+- Dialog forms for create/edit
+- Paginators for large lists
+- Select boxes for filters
+- Snackbar messages for success/error feedback
+
+Examples:
+
+Employee page:
+- Shows employees in a table.
+- Has search/filter controls.
+- Opens a form dialog for add/edit.
+
+Salary page:
+- Shows current salaries.
+- Allows salary assignment.
+- Allows salary revision.
+- Supports employee filter.
+
+Payroll page:
+- Shows generated payroll data.
+- Allows payroll generation.
+
+Users page:
+- Shows user accounts.
+- Allows admin to change access role.
+- Shows protected admin account clearly.
+
+Profile page:
+- Shows personal, job, role, and salary information in a readable layout.
+
+
+24. Reusable Frontend Code
+--------------------------
+The frontend uses base classes to avoid repeating common code.
+
+BaseListComponent:
+- Handles common list behavior.
+- Loads paged data.
+- Opens dialogs.
+- Deletes records.
+- Handles paginator events.
+
+BaseFormComponent:
+- Handles common form behavior.
+- Helps dialog forms share similar structure.
+
+This is a simple generalization technique.
+It keeps list and form components cleaner.
+
+
+25. Security Measures
+---------------------
+Security features used:
+
+- JWT authentication.
+- Role-based backend authorization.
+- Angular route guards.
+- Password hashing.
+- Protected admin account.
+- Account disabled check for inactive employees.
+- Validation before saving data.
+- API exception handling.
+
+Important point:
+Frontend route guards improve user experience, but backend authorization is the real security layer.
+
+
+26. How the Project Works End-to-End
+------------------------------------
+Example: Creating an employee
+
+1. Admin or HR opens Employee page.
+2. User clicks Add Employee.
+3. Angular opens employee form dialog.
+4. User fills employee data.
+5. Angular sends POST /api/employee.
+6. Backend validates DTO.
+7. EmployeeService saves employee.
+8. API returns success response.
+9. Angular refreshes employee table.
+
+Example: Assigning salary
+
+1. Admin or HR opens Salary page.
+2. User clicks Assign Salary.
+3. User selects employee and salary components.
+4. Angular sends POST /api/salary.
+5. Backend validates salary.
+6. SalaryService creates current salary.
+7. Angular refreshes salary list.
+
+Example: Updating salary
+
+1. Admin or HR edits existing salary.
+2. Backend marks old salary as non-current.
+3. Backend creates salary revision record.
+4. Backend creates new current salary.
+5. Salary history is preserved.
+
+Example: Generating payroll
+
+1. Admin or HR opens Payroll page.
+2. User selects month/year and enters bonus, deduction, tax values if needed.
+3. Angular sends POST /api/payroll.
+4. PayrollService gets employees and current salaries.
+5. System calculates net salary.
+6. Payroll records are saved.
+7. Payroll list displays generated records.
+
+Example: Login and profile
+
+1. User logs in.
+2. API returns JWT token and role.
+3. Angular stores token.
+4. User opens My Profile.
+5. Angular calls GET /api/auth/profile.
+6. API returns current user's employee, role, position, department, and salary information.
+
+
+27. Project Requirement Coverage
+--------------------------------
+Employee Management:
+- Add employee: implemented.
+- Edit employee: implemented.
+- Delete employee: implemented as termination/soft delete.
+- Store employee information: implemented.
+- Search/filter employee records: implemented.
+
+Salary Management:
+- Set employee salary: implemented.
+- Update salary: implemented.
+- Salary revision: implemented.
+- Deductions and bonuses: handled in payroll.
+- Validation and error handling: implemented.
+
+Payroll Management:
+- Generate monthly payroll: implemented.
+- Calculate tax/deduction/bonus/net salary: implemented.
+- Payroll list/report-like summary: implemented in UI list.
+
+Authentication and Authorization:
+- Login with JWT: implemented.
+- Role-based access: implemented.
+- Protected admin account: implemented.
+
+User Interface:
+- Angular Material UI: implemented.
+- Sidebar navigation: implemented.
+- Forms, tables, filters, pagination: implemented.
+
+Additional Features:
+- Attendance module.
+- Dashboard.
+- User profile page.
+- Admin user-role management.
+
+
+28. How to Explain This Project in Presentation
+-----------------------------------------------
+Suggested presentation order:
+
+1. Start with project purpose.
+   Explain that this HRMS manages employees, salaries, payroll, attendance, and user access.
+
+2. Explain database design.
+   Show Employee as the central table.
+   Explain how Department, Position, UserAccount, Salary, Payroll, and Attendance connect to Employee.
+
+3. Explain backend architecture.
+   Show Controllers, Services, DTOs, Models, Validators, Data, and Middleware.
+
+4. Explain API flow.
+   Use one example such as Add Employee or Generate Payroll.
+
+5. Explain authentication.
+   Show login, JWT token, role-based authorization, and protected routes.
+
+6. Explain validation and error handling.
+   Mention FluentValidation and ExceptionMiddleware.
+
+7. Explain pagination and filtering.
+   Mention PaginationParams and PagedResult.
+
+8. Explain modules one by one.
+   Employee, Salary, Payroll, Attendance, Profile, Users.
+
+9. Explain frontend.
+   Show Angular routes, sidebar, tables, forms, dialogs, guards, and services.
+
+10. Finish with requirement coverage.
+   Compare the assessment requirements with implemented features.
+
+
+29. Important Beginner Concepts Used
+------------------------------------
+DTO:
+A DTO is a simple object used to transfer data between frontend and backend.
+
+Service:
+A service contains business logic. Controllers call services.
+
+Controller:
+A controller receives HTTP requests and returns responses.
+
+Entity:
+An entity represents a database table.
+
+Migration:
+A migration updates the database schema based on entity changes.
+
+Validation:
+Validation checks if input data is correct before saving.
+
+JWT:
+JWT is a token used to remember logged-in users.
+
+Role:
+A role controls what a user can access.
+
+Pagination:
+Pagination loads data page by page instead of loading everything at once.
+
+Soft delete:
+Soft delete means the record is not physically removed from the database. Its status is changed so it no longer appears in normal lists.
+
+
+30. Conclusion
+--------------
+This HRMS project implements the main assessment requirements using ASP.NET Core, Entity Framework Core, PostgreSQL, and Angular.
+
+The backend is separated into controllers, services, models, DTOs, validators, and middleware.
+The frontend is separated into feature pages, services, guards, models, and layout.
+
+The system supports employee management, salary management, payroll generation, attendance, authentication, role-based authorization, user profile viewing, and admin user-role management.
+
+Overall, the project is suitable for a beginner-level assessment while still demonstrating important real-world software development concepts.

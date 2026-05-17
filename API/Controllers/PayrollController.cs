@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Admin,Hr")]
 public class PayrollController(IPayrollService service) : BaseApiController
 {
     [HttpPost]

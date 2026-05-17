@@ -25,9 +25,20 @@ export class SalaryService {
 
   private readonly apiUrl = `${environment.apiUrl}/salary`;
 
-  getAll(page = 1, pageSize = 10): Observable<PagedResult<Salary>> {
+  getAll(page = 1, pageSize = 10, filters?: {
+    employeeId?: number | null;
+  }): Observable<PagedResult<Salary>> {
+    const params = new URLSearchParams({
+      page: String(page),
+      pageSize: String(pageSize)
+    });
+
+    if (filters?.employeeId) {
+      params.set('employeeId', String(filters.employeeId));
+    }
+
     return this.http.get<PagedResult<Salary>>(
-      `${this.apiUrl}?page=${page}&pageSize=${pageSize}`
+      `${this.apiUrl}?${params.toString()}`
     );
   }
 

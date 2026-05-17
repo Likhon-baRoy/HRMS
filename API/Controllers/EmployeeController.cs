@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin,Hr,Manager")]
 public class EmployeeController(IEmployeeService service) : BaseApiController
 {
     [HttpGet]
@@ -25,6 +25,7 @@ public class EmployeeController(IEmployeeService service) : BaseApiController
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin,Hr")]
     public async Task<ActionResult> Create(CreateEmployeeDto dto)
     {
         var employee = await service.CreateAsync(dto);
@@ -37,6 +38,7 @@ public class EmployeeController(IEmployeeService service) : BaseApiController
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Roles = "Admin,Hr")]
     public async Task<ActionResult> Update(int id, UpdateEmployeeDto dto)
     {
         dto.Id = id;
@@ -45,6 +47,7 @@ public class EmployeeController(IEmployeeService service) : BaseApiController
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin,Hr")]
     public async Task<ActionResult> Delete(int id)
     {
         await service.DeleteAsync(id);

@@ -2,26 +2,47 @@
   <h2>
     {{ isEmployee ? 'My Attendance' : 'Attendance' }}
   </h2>
+</div>
 
-  <div class="actions">
+<div class="filters" [formGroup]="filters">
+  @if (!isEmployee) {
     <mat-form-field appearance="outline">
-      <mat-label>Remarks</mat-label>
-      <input
-        matInput
-        [(ngModel)]="remarks"
-        maxlength="250"
-        placeholder="Optional"
-      />
+      <mat-label>Employee</mat-label>
+      <mat-select formControlName="employeeId">
+        <mat-option [value]="null">All</mat-option>
+        @for (employee of employees; track employee.id) {
+          <mat-option [value]="employee.id">
+            {{ employee.firstName }} {{ employee.lastName }}
+          </mat-option>
+        }
+      </mat-select>
     </mat-form-field>
+  }
 
-    <button mat-raised-button color="primary" (click)="checkIn()">
-      Check In
-    </button>
+  <mat-form-field appearance="outline">
+    <mat-label>Date</mat-label>
+    <input matInput type="date" formControlName="attendanceDate" />
+  </mat-form-field>
+</div>
 
-    <button mat-raised-button color="accent" (click)="checkOut()">
-      Check Out
-    </button>
-  </div>
+<div class="actions">
+  <mat-form-field appearance="outline">
+    <mat-label>Remarks</mat-label>
+    <input
+      matInput
+      [(ngModel)]="remarks"
+      maxlength="250"
+      placeholder="Optional"
+    />
+  </mat-form-field>
+
+  <button mat-raised-button color="primary" (click)="checkIn()">
+    Check In
+  </button>
+
+  <button mat-raised-button color="accent" (click)="checkOut()">
+    Check Out
+  </button>
 </div>
 
 <table mat-table [dataSource]="attendances" class="mat-elevation-z2 full-width">
@@ -92,3 +113,11 @@
       columns: displayedColumns
     "></tr>
 </table>
+
+<mat-paginator
+  [length]="totalCount"
+  [pageIndex]="pageIndex"
+  [pageSize]="pageSize"
+  [pageSizeOptions]="pageSizeOptions"
+  (page)="onPageChange($event)"
+></mat-paginator>

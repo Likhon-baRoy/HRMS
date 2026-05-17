@@ -28,8 +28,17 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'attendance',
+        redirectTo: 'profile',
         pathMatch: 'full'
+      },
+
+      {
+        path: 'profile',
+        canActivate: [roleGuard],
+        data: { roles: ['Admin', 'HR', 'Manager', 'Employee'] },
+        loadComponent: () =>
+          import('./features/profile/profile')
+            .then(m => m.Profile)
       },
 
       {
@@ -84,6 +93,15 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/payroll/payroll-list/payroll-list')
             .then(m => m.PayrollList)
+      },
+
+      {
+        path: 'users',
+        canActivate: [roleGuard],
+        data: { roles: ['Admin'] },
+        loadComponent: () =>
+          import('./features/users/user-account-list/user-account-list')
+            .then(m => m.UserAccountList)
       },
 
       {

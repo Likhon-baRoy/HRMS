@@ -8,3 +8,12 @@
 .full-width {
   width: 100%;
 }
+
+.filters {
+  margin-bottom: 16px;
+}
+
+.filters mat-form-field {
+  max-width: 360px;
+  width: 100%;
+}

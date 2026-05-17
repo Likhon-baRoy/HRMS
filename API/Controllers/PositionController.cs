@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin,Hr,Manager")]
 public class PositionController(IPositionService service) : BaseApiController
 {
     [HttpGet]
@@ -32,6 +32,7 @@ public class PositionController(IPositionService service) : BaseApiController
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin,Hr")]
     public async Task<ActionResult> Create(CreatePositionDto dto)
     {
         var position =
@@ -50,6 +51,7 @@ public class PositionController(IPositionService service) : BaseApiController
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Roles = "Admin,Hr")]
     public async Task<ActionResult> Update(int id, UpdatePositionDto dto)
     {
         await service
@@ -59,6 +61,7 @@ public class PositionController(IPositionService service) : BaseApiController
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin,Hr")]
     public async Task<ActionResult> Delete(int id)
     {
         await service

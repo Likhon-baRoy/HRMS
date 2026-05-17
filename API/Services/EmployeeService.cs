@@ -15,6 +15,8 @@ namespace API.Services;
 
 public class EmployeeService(AppDbContext context, IMapper mapper, ICurrentUserService currentUser) : IEmployeeService
 {
+    private const string ProtectedAdminUsername = "admin";
+
     private readonly ICurrentUserService _currentUser = currentUser;
 
     public async Task<PagedResult<EmployeeDto>> GetAllAsync(PaginationParams param)
@@ -84,6 +86,8 @@ public class EmployeeService(AppDbContext context, IMapper mapper, ICurrentUserS
     {
         var employee = mapper.Map<Employee>(dto);
 
+        NormalizeDates(employee);
+
         context.Employees.Add(employee);
 
         await context.SaveChangesAsync();
@@ -95,7 +99,9 @@ public class EmployeeService(AppDbContext context, IMapper mapper, ICurrentUserS
     {
         var employee =
             await context.Employees
-                .GetByIdOrThrowAsync(id);
+                .Include(x => x.UserAccount)
+                .FirstOrDefaultAsync(x => x.Id == id)
+            ?? throw new NotFoundException(nameof(Employee), id);
 
         if (!string.IsNullOrWhiteSpace(dto.Phone))
         {
@@ -122,7 +128,49 @@ public class EmployeeService(AppDbContext context, IMapper mapper, ICurrentUserS
             }
         }
 
+        if (
+            _currentUser.IsSelf(id) &&
+            dto.EmployeeStatus.HasValue &&
+            dto.EmployeeStatus.Value != employee.EmployeeStatus
+        )
+        {
+            throw new AppValidationException(
+                "Validation failed",
+                new Dictionary<string, string[]>
+                {
+                    {
+                        "employeeStatus",
+                        [
+                            "You cannot change your own status"
+                        ]
+                    }
+                }
+            );
+        }
+
+        if (
+            IsProtectedAdminEmployee(employee) &&
+            dto.EmployeeStatus.HasValue &&
+            dto.EmployeeStatus.Value != employee.EmployeeStatus
+        )
+        {
+            throw new AppValidationException(
+                "Validation failed",
+                new Dictionary<string, string[]>
+                {
+                    {
+                        "employeeStatus",
+                        [
+                            "Protected admin status cannot be changed"
+                        ]
+                    }
+                }
+            );
+        }
+
         mapper.Map(dto, employee);
+
+        NormalizeDates(employee);
 
         await context.SaveChangesAsync();
     }
@@ -146,10 +194,51 @@ public class EmployeeService(AppDbContext context, IMapper mapper, ICurrentUserS
         }
 
         var employee = await context.Employees
-            .GetByIdOrThrowAsync(id);
+            .Include(x => x.UserAccount)
+            .FirstOrDefaultAsync(x => x.Id == id)
+            ?? throw new NotFoundException(nameof(Employee), id);
+
+        if (IsProtectedAdminEmployee(employee))
+        {
+            throw new AppValidationException(
+                "Validation failed",
+                new Dictionary<string, string[]>
+                {
+                    {
+                        "employee",
+                        [
+                            "Protected admin employee cannot be deleted"
+                        ]
+                    }
+                }
+            );
+        }
 
         employee.EmployeeStatus = EmployeeStatus.Terminated;
 
         await context.SaveChangesAsync();
+    }
+
+    private static void NormalizeDates(Employee employee)
+    {
+        employee.DateOfBirth = NormalizeToUtc(employee.DateOfBirth);
+        employee.HireDate = NormalizeToUtc(employee.HireDate);
+    }
+
+    private static DateTime NormalizeToUtc(DateTime dateTime)
+    {
+        return dateTime.Kind switch
+        {
+            DateTimeKind.Utc => dateTime,
+            DateTimeKind.Local => dateTime.ToUniversalTime(),
+            _ => DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)
+        };
+    }
+
+    private static bool IsProtectedAdminEmployee(Employee employee)
+    {
+        return employee.UserAccount?.Username.Equals(
+            ProtectedAdminUsername,
+            StringComparison.OrdinalIgnoreCase) == true;
     }
 }
